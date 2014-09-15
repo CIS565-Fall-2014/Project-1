@@ -1,0 +1,56 @@
+﻿Build started 9/15/2014 4:39:24 PM.
+     1>Project "C:\Users\harmoli\Documents\CIS565\Project3-Simulation\Part1\PROJ_WIN\Project3\Project3.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "Debug\Project3.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       AddCudaCompileDeps:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\cl.exe /E /nologo /showIncludes /TP /D__CUDACC__ /DWIN32 /D_DEBUG /D_CONSOLE /D_MBCS /I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include" /I"C:/ProgramData/NVIDIA Corporation/CUDA Samples/v5.5/common/inc" /I../shared/glew/includes /I../shared/freeglut/includes /I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include" /I"C:/ProgramData/NVIDIA Corporation/CUDA Samples/v5.5/common/inc" /I../shared/glew/includes /I../shared/freeglut/includes /I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\bin" /I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include" /I. /FIcuda_runtime.h /c C:\Users\harmoli\Documents\CIS565\Project3-Simulation\Part1\src\kernel.cu 
+       AddCudaCompilePropsDeps:
+       Skipping target "AddCudaCompilePropsDeps" because all output files are up-to-date with respect to the input files.
+       CudaBuild:
+         Compiling CUDA source file ..\..\src\kernel.cu...
+         cmd.exe /C "C:\Users\harmoli\AppData\Local\Temp\tmpf16f63b9317549b68408123adeee9f4a.cmd"
+         "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\bin\nvcc.exe" -gencode=arch=compute_10,code=\"sm_10,compute_10\" -gencode=arch=compute_20,code=\"sm_20,compute_20\" --use-local-env --cl-version 2010 -ccbin "c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin"  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include" -I"C:/ProgramData/NVIDIA Corporation/CUDA Samples/v5.5/common/inc" -I../shared/glew/includes -I../shared/freeglut/includes -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include" -I"C:/ProgramData/NVIDIA Corporation/CUDA Samples/v5.5/common/inc" -I../shared/glew/includes -I../shared/freeglut/includes -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include"  -G -lineinfo  --keep-dir Debug -maxrregcount=0  --machine 32 --compile -cudart static  -g   -DWIN32 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Zi /RTC1 /MDd  " -o C:\Users\harmoli\Documents\CIS565\Project3-Simulation\Part1\PROJ_WIN\Project3\Win32/Debug/kernel.cu.obj "C:\Users\harmoli\Documents\CIS565\Project3-Simulation\Part1\src\kernel.cu"
+         
+         C:\Users\harmoli\Documents\CIS565\Project3-Simulation\Part1\PROJ_WIN\Project3>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\bin\nvcc.exe" -gencode=arch=compute_10,code=\"sm_10,compute_10\" -gencode=arch=compute_20,code=\"sm_20,compute_20\" --use-local-env --cl-version 2010 -ccbin "c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin"  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include" -I"C:/ProgramData/NVIDIA Corporation/CUDA Samples/v5.5/common/inc" -I../shared/glew/includes -I../shared/freeglut/includes -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include" -I"C:/ProgramData/NVIDIA Corporation/CUDA Samples/v5.5/common/inc" -I../shared/glew/includes -I../shared/freeglut/includes -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include"  -G -lineinfo  --keep-dir Debug -maxrregcount=0  --machine 32 --compile -cudart static  -g   -DWIN32 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Zi /RTC1 /MDd  " -o C:\Users\harmoli\Documents\CIS565\Project3-Simulation\Part1\PROJ_WIN\Project3\Win32/Debug/kernel.cu.obj "C:\Users\harmoli\Documents\CIS565\Project3-Simulation\Part1\src\kernel.cu" 
+     1>c:\users\harmoli\documents\cis565\project3-simulation\part1\src\glm\core\func_exponential.inl(149): warning : calling a __host__ function("_wassert") from a __host__ __device__ function("glm::inversesqrt<float> ") is not allowed
+         
+     1>c:\users\harmoli\documents\cis565\project3-simulation\part1\src\glm\core\_swizzle.hpp(64): warning : function "glm::detail::_swizzle_base0<T, N>::elem(size_t) const [with T=T, N=2]" was referenced but not defined
+         
+     1>c:\users\harmoli\documents\cis565\project3-simulation\part1\src\glm\core\_swizzle.hpp(64): warning : function "glm::detail::_swizzle_base0<T, N>::elem(size_t) const [with T=T, N=3]" was referenced but not defined
+         
+     1>c:\users\harmoli\documents\cis565\project3-simulation\part1\src\glm\core\_swizzle.hpp(64): warning : function "glm::detail::_swizzle_base0<T, N>::elem(size_t) const [with T=T, N=4]" was referenced but not defined
+         
+     1>ptxas : warning : Command line option '--generate-line-info' not supported for 'sm_1x architecture', will be ignored
+         ptxas C:/Users/harmoli/AppData/Local/Temp/tmpxft_0000070c_00000000-7_kernel.compute_10.ptx, line 1445; : warning : Double is not supported. Demoting to float
+     1>c:\users\harmoli\documents\cis565\project3-simulation\part1\src\glm\core\_swizzle.hpp(64): warning : function "glm::detail::_swizzle_base0<T, N>::elem(size_t) const [with T=T, N=2]" was referenced but not defined
+         
+     1>c:\users\harmoli\documents\cis565\project3-simulation\part1\src\glm\core\_swizzle.hpp(64): warning : function "glm::detail::_swizzle_base0<T, N>::elem(size_t) const [with T=T, N=3]" was referenced but not defined
+         
+     1>c:\users\harmoli\documents\cis565\project3-simulation\part1\src\glm\core\_swizzle.hpp(64): warning : function "glm::detail::_swizzle_base0<T, N>::elem(size_t) const [with T=T, N=4]" was referenced but not defined
+         
+     1>C:/Users/harmoli/Documents/CIS565/Project3-Simulation/Part1/src/kernel.cu(48): warning C4244: 'argument' : conversion from 'float' to 'unsigned int', possible loss of data
+       ClCompile:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\include" /I"C:/ProgramData/NVIDIA Corporation/CUDA Samples/v5.5/common/inc" /I../shared/glew/includes /I../shared/freeglut/includes /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt ..\..\src\main.cpp
+         main.cpp
+         Note: including lib: glut32.lib
+         
+     1>c:\users\harmoli\documents\cis565\project3-simulation\part1\src\main.cpp(31): warning C4101: 'passthroughProgram' : unreferenced local variable
+     1>c:\users\harmoli\documents\cis565\project3-simulation\part1\src\main.cpp(90): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 c:\program files (x86)\microsoft visual studio 10.0\vc\include\stdio.h(371) : see declaration of 'sprintf'
+       Link:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\harmoli\Documents\CIS565\Project3-Simulation\Part1\PROJ_WIN\Debug\Project3.exe" /INCREMENTAL:NO /NOLOGO /LIBPATH:../shared/glew/lib /LIBPATH:../shared/freeglut/lib /LIBPATH:"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v5.5\lib\Win32" cudart.lib glew32.lib glu32.lib opengl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\Project3.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\harmoli\Documents\CIS565\Project3-Simulation\Part1\PROJ_WIN\Debug\Project3.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /ENTRY:"mainCRTStartup" /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\harmoli\Documents\CIS565\Project3-Simulation\Part1\PROJ_WIN\Debug\Project3.lib" /MACHINE:X86 "C:\Users\harmoli\Documents\CIS565\Project3-Simulation\Part1\PROJ_WIN\Project3\Win32/Debug/kernel.cu.obj"
+         Debug\glslUtility.obj
+         Debug\main.obj
+         Debug\utilities.obj
+     1>glslUtility.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
+         Project3.vcxproj -> C:\Users\harmoli\Documents\CIS565\Project3-Simulation\Part1\PROJ_WIN\Debug\Project3.exe
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"C:\Users\harmoli\Documents\CIS565\Project3-Simulation\Part1\PROJ_WIN\Debug\Project3.exe;#1" /manifest Debug\Project3.exe.intermediate.manifest
+       FinalizeBuildStatus:
+         Deleting file "Debug\Project3.unsuccessfulbuild".
+         Touching "Debug\Project3.lastbuildstate".
+     1>Done Building Project "C:\Users\harmoli\Documents\CIS565\Project3-Simulation\Part1\PROJ_WIN\Project3\Project3.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:11.61
