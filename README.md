@@ -1,7 +1,7 @@
 Project 1
 =========
 
-Project 1 : Introduction to CUDA
+# Project 1 : Introduction to CUDA
 
 ## NOTE :
 This project (and all other projects in this course) requires a NVIDIA graphics
@@ -21,7 +21,7 @@ NOTE : If you are using Linux / Mac, most of the screenshots and class usage of
 NSight will be in Visual Studio.  You are free to use to the Eclipse version
 NSight during these in class labs, but we will not be able to help you as much.
 
-# PART 2 : NBODY SIMULATION
+## PART 2 : NBODY SIMULATION
 To get you used to using CUDA kernels, we will be writing a simple 2D nbody 
 simulator.  The following source files are included in the project:
 
@@ -31,17 +31,17 @@ simulator.  The following source files are included in the project:
 All the code that you will need to modify is in kernel.cu and is marked clearly
 by TODOs.
 
-# PART 3 : MATRIX MATH
+## PART 3 : MATRIX MATH
 In this portion we will walk you through setting up a project that writes some
 simple matrix math functions. Please put this portion in a folder marked Part2
 in your repository. 
 
-## Step 1 : Create your project.
+### Step 1 : Create your project.
 Using the instructions on the Google forum, please set up a new Visual Studio project that
 compiles using CUDA. For uniformity, please write your main function and all
 your code in a file named matrix_math.cu.
 
-## Step 2 : Setting up CUDA memory.
+### Step 2 : Setting up CUDA memory.
 As we discussed in class, there is host memory and device memory.  Host memory
 is the memory that exists on the CPU, whereas device memory is memory on the
 GPU.  
@@ -62,7 +62,7 @@ Please initialize 2 5 x 5 matrices represented as an array of floats on the CPU
 and the GPU where each of the entry is equal to its position (i.e. A_00 = 0,
 A_01 = 1, A_44 = 24). 
 
-## Step 3 : Creating CUDA kernels. 
+### Step 3 : Creating CUDA kernels. 
 In the previous part, we explicitly divided the CUDA kernels from the rest of
 the file for stylistic purposes.  Since there will be far less code in this
 project, we will write the global and device functions in the same file as the
@@ -91,12 +91,12 @@ THINGS TO REMEMBER :
   red squiggly lines underneath CUDA keywords).  There is a way to integrate
   CUDA syntax highlighting into Visual Studio, but it is not the default.
 
-## Step 4 : Write a serial version.
+### Step 4 : Write a serial version.
 For comparison, write a single-threaded CPU version of mat_add, mat_sub and
 mat_mult. We will not introduce timing elements in this homework, but please
 keep them in mind as the upcoming lab will introduce more on this topic. 
 
-# PART 4 : PERFORMANCE ANALYSIS
+## PART 4 : PERFORMANCE ANALYSIS
 Since this is the first assignment, we will guide you with some example
 questions.  In future assignments, please answer at least these questions, as
 they go through basic performance analysis.  Please go above and beyond the
@@ -113,3 +113,8 @@ describe the changes you make between experiments and how you are benchmarking.
 * How does changing the number of planets change performance? Why?
 * Without running experiments, how would you expect the serial and GPU verions
   of matrix_math to compare?  Why?
+
+## SUBMISSION
+Please commit your changes to your forked version of the repository and open a
+pull request.  Please write your performance analysis in your README.md.
+Remember to email Harmony (harmoli+CIS565@seas.upenn.edu) your grade and why.
