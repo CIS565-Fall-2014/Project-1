@@ -93,12 +93,12 @@ THINGS TO REMEMBER :
 
 ### Step 4 : Write a serial version.
 For comparison, write a single-threaded CPU version of mat_add, mat_sub and
-mat_mult. We will not introduce timing elements in this homework, but please
+mat_mult. We will not introduce timing elements in this project, but please
 keep them in mind as the upcoming lab will introduce more on this topic. 
 
 ## PART 4 : PERFORMANCE ANALYSIS
-Since this is the first assignment, we will guide you with some example
-questions.  In future assignments, please answer at least these questions, as
+Since this is the first project, we will guide you with some example
+questions.  In future projects, please answer at least these questions, as
 they go through basic performance analysis.  Please go above and beyond the
 questions we suggest and explore how different aspects of your code impact
 performance as a whole. 
