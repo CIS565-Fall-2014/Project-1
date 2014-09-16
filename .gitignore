@@ -31,5 +31,5 @@ builds/
 *.swp
 
 # Exceptions
-!shared/*
+!*/shared/*
 
