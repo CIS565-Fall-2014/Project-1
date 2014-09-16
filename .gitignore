@@ -29,3 +29,7 @@ builds/
 
 # VIM swap files
 *.swp
+
+# Exceptions
+!shared/*
+
