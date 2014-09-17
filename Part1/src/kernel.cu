@@ -159,19 +159,19 @@ void initCuda(int N)
     dim3 fullBlocksPerGrid((int)ceil(float(N)/float(blockSize)));
 
     cudaMalloc((void**)&dev_pos, N*sizeof(glm::vec4));
-    checkCUDAErrorWithLine("Kernel failed!");
+    //checkCUDAErrorWithLine("Kernel failed!");
     
 	cudaMalloc((void**)&dev_vel, N*sizeof(glm::vec3));
-    checkCUDAErrorWithLine("Kernel failed!");
+    //checkCUDAErrorWithLine("Kernel failed!");
     
 	cudaMalloc((void**)&dev_acc, N*sizeof(glm::vec3));
-    checkCUDAErrorWithLine("Kernel failed!");
+    //checkCUDAErrorWithLine("Kernel failed!");
 
     generateRandomPosArray<<<fullBlocksPerGrid, blockSize>>>(1, numObjects, dev_pos, scene_scale, planetMass);
-    checkCUDAErrorWithLine("Kernel failed!");
+    //checkCUDAErrorWithLine("Kernel failed!");
     
 	generateCircularVelArray<<<fullBlocksPerGrid, blockSize>>>(2, numObjects, dev_vel, dev_pos);
-    checkCUDAErrorWithLine("Kernel failed!");
+    //checkCUDAErrorWithLine("Kernel failed!");
     
 	cudaThreadSynchronize();
 }
