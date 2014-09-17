@@ -89,13 +89,14 @@ __global__ void generateCircularVelArray(int time, int N, glm::vec3 * arr, glm::
 //		 REMEMBER : F = (G * m_a * m_b) / (r_ab ^ 2)
 __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 {
+	glm::vec4 r_ab = my_pos - *their_pos; 
     return glm::vec3(0.0f);
 }
 
 // TODO : update the acceleration of each body
 __global__ void updateF(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
-	// FILL IN HERE
+	acc3 = 
 }
 
 // TODO : update velocity and position using a simple Euler integration scheme
@@ -179,7 +180,15 @@ void initCuda(int N)
 // TODO : Using the functions you wrote above, write a function that calls the CUDA kernels to update a single sim step
 void cudaNBodyUpdateWrapper(float dt)
 {
-	// FILL IN HERE
+	for (int i = 0; i < numObjects; i++) 
+	{
+		for (int j = 0, j < numObjects; j++) 
+		{
+			accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos); 
+			updateF(int N, dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc); 
+			updateS(int N, dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc); 
+		}
+	}
 }
 
 void cudaUpdateVBO(float * vbodptr, int width, int height)
