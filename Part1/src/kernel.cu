@@ -94,20 +94,25 @@ __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 	glm::vec4 r_ab; 
 	glm::vec3 r_ab_dir;
 
+	int index = threadIdx.x + (blockIdx.x * blockDim.x);
+
 	// loop through planets 
 	for (int i = 0; i < N; i++)
 	{
+		if (glm::length(r_ab) > 0.0f) 
+		{
 		r_ab = their_pos[i]-my_pos; 
 		r_ab_dir = glm::vec3(r_ab.x, r_ab.y, r_ab.z); 
 		glm::normalize(r_ab_dir); 
 		Fmag = G*my_pos.w*their_pos[i].w/(pow(glm::length(r_ab),2)+EPSILON); 
 		F += glm::vec3(r_ab_dir.x*Fmag, r_ab_dir.y*Fmag, r_ab_dir.z*Fmag); 
+		}
 	}
 
 	// add force from the sun (at 0,0,0)
-	glm::vec3 r_sun = glm::vec3(my_pos.x, my_pos.y, my_pos.z); 
+	glm::vec3 r_sun = glm::vec3(-my_pos.x, -my_pos.y, -my_pos.z); 
 	Fmag = G*my_pos.w*starMass/(pow(glm::length(r_sun),2)+EPSILON); 
-	glm::normalize(r_sun); 
+	glm::normalize(r_sun);
 	F += glm::vec3(r_sun.x*Fmag, r_sun.y*Fmag, r_sun.z*Fmag); 
 
     return F;
