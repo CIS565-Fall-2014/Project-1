@@ -87,21 +87,91 @@ __global__ void generateCircularVelArray(int time, int N, glm::vec3 * arr, glm::
 //		 HINT : You may want to write a helper function that will help you 
 //              calculate the acceleration contribution of a single body.
 //		 REMEMBER : F = (G * m_a * m_b) / (r_ab ^ 2)
-__device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
+__device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)//Maybe ok??? :'(
 {
-    return glm::vec3(0.0f);
+	//You might need to take into account the acceleration of EVERY other body
+	//So this method can call a helper method as was in the hint, and the helper method
+	//will do the below calculations, but essentially you need to calculate the acceleration
+	//due to all other bodies
+	glm::vec3 r = glm::vec3(their_pos->x - my_pos.x, their_pos->y - my_pos.y, their_pos->z - my_pos.z);
+	float r_ab1 = pow(r.x,2.f) + pow(r.y,2.f) + pow(r.z,2.f);
+	float r_ab2 = r_ab1 * sqrt(r_ab1);
+	glm::vec3 a = glm::vec3(3e8*starMass*r.x/r_ab2, 3e8*starMass*r.y/r_ab2, 3e8*starMass*r.z/r_ab2);
+	//float f = (G * 3e8 * starMass) / pow(r_ab, 2.f);
+    return a;
 }
 
 // TODO : update the acceleration of each body
 __global__ void updateF(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
 	// FILL IN HERE
+
+	/*int width = 800;
+	int height = 800;
+	float s_scale = 2e2;
+
+	int index = threadIdx.x + (blockIdx.x * blockDim.x);
+    int x = index % width;
+    int y = index / width;
+
+	float w2 = width / 2.0;
+    float h2 = height / 2.0;
+
+    float c_scale_w = width / s_scale;
+    float c_scale_h = height / s_scale;
+
+    glm::vec3 a = accelerate(N, glm::vec4((x-w2)/c_scale_w,(y-h2)/c_scale_h,0,1), pos);
+	acc->x = acc->x + a.x;
+	acc->y = acc->y + a.y;
+	acc->z = acc->z + a.z;*/
+
+	
+	int width = 800;
+	int height = 800;
+	float s_scale = 2e2;
+	int index = threadIdx.x + (blockIdx.x * blockDim.x);
+
+	for (int i = 0; i < N; i++) {
+		int x = i % width;
+		int y = i / width;
+		float w2 = width / 2.0;
+		float h2 = height / 2.0;
+		float c_scale_w = width / s_scale;
+		float c_scale_h = height / s_scale;
+		glm::vec4 * p = new glm::vec4();
+		p->x = pos[i].x;
+		p->y = pos[i].y;
+		p->z = pos[i].z;
+		glm::vec3 a = accelerate(N, glm::vec4((x-w2)/c_scale_w,(y-h2)/c_scale_h,0,1), p);
+		acc[i].x = acc[i].x + a.x;
+		acc[i].y = acc[i].y + a.y;
+		acc[i].z = acc[i].z + a.z;
+	}
+
 }
 
 // TODO : update velocity and position using a simple Euler integration scheme
-__global__ void updateS(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
+__global__ void updateS(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc) //DONE
 {
-	// FILL IN HERE
+	/*pos->x = pos->x + vel->x * dt;
+	pos->y = pos->y + vel->y * dt;
+	pos->z = pos->z + vel->z * dt;
+	pos->w = pos->w + dt;
+					
+	vel->x = vel->x + acc->x * dt;
+	vel->y = vel->y + acc->y * dt;
+	vel->z = vel->z + acc->z * dt;*/
+
+	for (int i = 0; i < N; i++) {
+		pos[i].x = pos[i].x + vel[i].x * dt;
+		pos[i].y = pos[i].y + vel[i].y * dt;
+		pos[i].z = pos[i].z + vel[i].z * dt;
+		//pos[i].w += 1;//= pos[i].w + dt;
+				
+		vel[i].x = vel[i].x + acc[i].x * dt;
+		vel[i].y = vel[i].y + acc[i].y * dt;
+		vel[i].z = vel[i].z + acc[i].z * dt;
+	}
 }
 
 // Update the vertex buffer object
@@ -180,6 +250,9 @@ void initCuda(int N)
 void cudaNBodyUpdateWrapper(float dt)
 {
 	// FILL IN HERE
+	dim3 fullBlocksPerGrid((int)ceil(float(numObjects)/float(blockSize)));
+	//updateF<<<fullBlocksPerGrid, blockSize>>>(numObjects, dt, dev_pos, dev_vel, dev_acc);
+	updateS<<<fullBlocksPerGrid, blockSize>>>(numObjects, dt, dev_pos, dev_vel, dev_acc);
 }
 
 void cudaUpdateVBO(float * vbodptr, int width, int height)
