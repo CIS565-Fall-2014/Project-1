@@ -78,3 +78,6 @@ set(SOURCE_FILES ${SOURCE_FILES}
 cuda_add_executable(CIS565_PROJ_1 ${SOURCE_FILES} OPTIONS -arch=sm_20)
 
 target_link_libraries(CIS565_PROJ_1 ${CORELIBS})
+
+file(COPY shaders
+    DESTINATION .)
