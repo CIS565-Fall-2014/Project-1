@@ -1,5 +1,9 @@
 # General
 builds/
+build/
+
+*.orig
+*~
 
 # Compiled objects
 *.o
