@@ -55,6 +55,7 @@ __host__ __device__ glm::vec3 generateRandomNumberFromThread(float time, int ind
 //Also initialized the masses
 __global__ void generateRandomPosArray(int time, int N, glm::vec4 * arr, float scale, float mass)
 {
+	int a = 0;
     int index = (blockIdx.x * blockDim.x) + threadIdx.x;
     if(index < N)
     {
@@ -70,6 +71,7 @@ __global__ void generateRandomPosArray(int time, int N, glm::vec4 * arr, float s
 //the mass ratio is too close, but it makes for an interesting looking scene
 __global__ void generateCircularVelArray(int time, int N, glm::vec3 * arr, glm::vec4 * pos)
 {
+
     int index = (blockIdx.x * blockDim.x) + threadIdx.x;
     if(index < N)
     {
@@ -83,25 +85,66 @@ __global__ void generateCircularVelArray(int time, int N, glm::vec3 * arr, glm::
     }
 }
 
+__global__ void computeAccelerate(float mass){
+
+}
+
 // TODO: Core force calc kernel global memory
 //		 HINT : You may want to write a helper function that will help you 
 //              calculate the acceleration contribution of a single body.
 //		 REMEMBER : F = (G * m_a * m_b) / (r_ab ^ 2)
 __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 {
-    return glm::vec3(0.0f);
+
+
+	int index = threadIdx.x + (blockIdx.x * blockDim.x);
+
+
+	glm::vec3 dis = glm::vec3(their_pos[index].x - my_pos.x, their_pos[index].y - my_pos.y, their_pos[index].z - my_pos.z);
+	float length = glm::length(dis);
+	glm::vec3 unit = dis / length;
+
+
+	//glm::vec3 force =  G  * starMass /(length * length) * unit;
+
+
+
+
+    return glm::vec3(1.0f);
 }
 
 // TODO : update the acceleration of each body
 __global__ void updateF(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
 	// FILL IN HERE
+	//glm::vec3 temp = glm::vec3(0,0,0);
+	int index = threadIdx.x + (blockIdx.x * blockDim.x);
+	if(index < N){
+		glm::vec3 temp = accelerate(N, pos[index], pos);
+		acc[index].x = temp.x;
+		acc[index].y = temp.y;
+		acc[index].z = temp.z;
+	}
+	
+
 }
 
 // TODO : update velocity and position using a simple Euler integration scheme
 __global__ void updateS(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
 	// FILL IN HERE
+	int index = threadIdx.x + (blockIdx.x * blockDim.x);
+	if(index < N){
+		vel[index].x += acc[index].x * dt; 
+		vel[index].y += acc[index].y * dt; 
+		vel[index].z += acc[index].z * dt; 
+
+		pos[index].x += vel[index].x * dt; 
+		pos[index].y += vel[index].y * dt; 
+		pos[index].z += vel[index].z * dt; 
+
+	}
+
 }
 
 // Update the vertex buffer object
@@ -180,6 +223,23 @@ void initCuda(int N)
 void cudaNBodyUpdateWrapper(float dt)
 {
 	// FILL IN HERE
+	//generateRandomPosArray  (int time, int N, glm::vec4 * arr, float scale, float mass)
+	//generateRandomPosArray<<<fullBlocksPerGrid, blockSize>>>(1, numObjects, dev_pos, scene_scale, planetMass);
+
+	//generateCircularVelArray(int time, int N, glm::vec3 * arr, glm::vec4 * pos)
+	//generateCircularVelArray<<<fullBlocksPerGrid, blockSize>>>(2, numObjects, dev_vel, dev_pos);
+
+	//accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
+
+	//updateF(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
+	//updateF<<<fullBlocksPerGrid, blockSize, blockSize*sizeof(glm::vec4)>>>(numObjects, dt,  dev_pos, dev_vel, dev_acc);
+
+	//updateS(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
+	//updateF<<<fullBlocksPerGrid, blockSize, blockSize*sizeof(glm::vec4)>>>(numObjects, dt,  dev_pos, dev_vel, dev_acc);
+
+	//sendToPBO(int N, glm::vec4 * pos, float4 * pbo, int width, int height, float s_scale)
+	//sendToPBO<<<fullBlocksPerGrid, blockSize, blockSize*sizeof(glm::vec4)>>>(numObjects, dev_pos, pbodptr, width, height, scene_scale);
+	
 }
 
 void cudaUpdateVBO(float * vbodptr, int width, int height)
