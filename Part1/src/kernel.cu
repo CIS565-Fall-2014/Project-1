@@ -4,6 +4,7 @@
 #include "glm/glm.hpp"
 #include "utilities.h"
 #include "kernel.h"
+#include <iostream>
 
 //GLOBALS
 dim3 threadsPerBlock(blockSize);
@@ -28,6 +29,7 @@ void checkCUDAError(const char *msg, int line = -1)
             fprintf(stderr, "Line %d: ", line);
         }
         fprintf(stderr, "Cuda error: %s: %s.\n", msg, cudaGetErrorString( err) ); 
+		system("pause");
         exit(EXIT_FAILURE); 
     }
 } 
@@ -88,20 +90,51 @@ __global__ void generateCircularVelArray(int time, int N, glm::vec3 * arr, glm::
 //              calculate the acceleration contribution of a single body.
 //		 REMEMBER : F = (G * m_a * m_b) / (r_ab ^ 2)
 __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
-{
-    return glm::vec3(0.0f);
+{	
+	glm::vec3 acc(0,0,0);
+
+	for(int index=0;index<N;index++)
+	{
+		glm::vec3 tempacc(0,0,0);
+		glm::vec3 dist = glm::vec3(their_pos[index].x - my_pos.x ,their_pos[index].y - my_pos.y,their_pos[index].z - my_pos.z);
+	    float mag = dist.x*dist.x + dist.y*dist.y + dist.z*dist.z;
+		if(mag > 0.001f)
+	    {
+	        float forcef = (G * their_pos[index].w)/mag;
+		    tempacc = glm::normalize(dist) * forcef;
+	    	acc = acc + tempacc;
+		}
+	}
+	return acc;
 }
 
 // TODO : update the acceleration of each body
 __global__ void updateF(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
 	// FILL IN HERE
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+
+	if(index<N)
+	{
+	    glm::vec4 my_pos = pos[index];
+		glm::vec3 newacc = accelerate(N,my_pos,pos);
+		acc[index] = newacc;
+	}
 }
 
 // TODO : update velocity and position using a simple Euler integration scheme
 __global__ void updateS(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
 	// FILL IN HERE
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+
+	if(index < N)
+	{
+		vel[index] = vel[index] + dt * acc[index];
+		pos[index].x = pos[index].x + dt * vel[index].x;
+		pos[index].y = pos[index].y + dt * vel[index].y;
+		pos[index].z = pos[index].z + dt * vel[index].z;
+	}
 }
 
 // Update the vertex buffer object
@@ -159,19 +192,19 @@ void initCuda(int N)
     dim3 fullBlocksPerGrid((int)ceil(float(N)/float(blockSize)));
 
     cudaMalloc((void**)&dev_pos, N*sizeof(glm::vec4));
-    //checkCUDAErrorWithLine("Kernel failed!");
+    checkCUDAErrorWithLine("Kernel failed!");
     
 	cudaMalloc((void**)&dev_vel, N*sizeof(glm::vec3));
-    //checkCUDAErrorWithLine("Kernel failed!");
+    checkCUDAErrorWithLine("Kernel failed!");
     
 	cudaMalloc((void**)&dev_acc, N*sizeof(glm::vec3));
-    //checkCUDAErrorWithLine("Kernel failed!");
+    checkCUDAErrorWithLine("Kernel failed!");
 
     generateRandomPosArray<<<fullBlocksPerGrid, blockSize>>>(1, numObjects, dev_pos, scene_scale, planetMass);
-    //checkCUDAErrorWithLine("Kernel failed!");
+    checkCUDAErrorWithLine("Kernel failed!");
     
 	generateCircularVelArray<<<fullBlocksPerGrid, blockSize>>>(2, numObjects, dev_vel, dev_pos);
-    //checkCUDAErrorWithLine("Kernel failed!");
+    checkCUDAErrorWithLine("Kernel failed!");
     
 	cudaThreadSynchronize();
 }
@@ -180,6 +213,10 @@ void initCuda(int N)
 void cudaNBodyUpdateWrapper(float dt)
 {
 	// FILL IN HERE
+	dim3 fullBlocksPerGrid((int)ceil(float(numObjects)/float(blockSize)));
+	updateF<<<fullBlocksPerGrid,blockSize>>>(numObjects,dt,dev_pos,dev_vel,dev_acc);
+	updateS<<<fullBlocksPerGrid,blockSize>>>(numObjects,dt,dev_pos,dev_vel,dev_acc);
+	cudaThreadSynchronize();
 }
 
 void cudaUpdateVBO(float * vbodptr, int width, int height)

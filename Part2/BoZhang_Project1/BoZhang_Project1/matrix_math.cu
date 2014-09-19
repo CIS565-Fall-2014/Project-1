@@ -1,121 +1,227 @@
 
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
-
+#include <iostream>
 #include <stdio.h>
 
-cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size);
-
-__global__ void addKernel(int *c, const int *a, const int *b)
+__global__ void mat_add(float *A,float *B,float *C,int width)
 {
-    int i = threadIdx.x;
-    c[i] = a[i] + b[i];
+	int tx = threadIdx.x;
+	int ty = threadIdx.y;
+	float M = A[ty*width + tx];
+	float N = B[ty*width + tx];
+	C[ty*width + tx] = M+N;
+}
+
+__global__ void mat_sub(float *A,float *B,float *C,int width)
+{
+	int tx = threadIdx.x;
+	int ty = threadIdx.y;
+	float M = A[ty*width + tx];
+	float N = B[ty*width + tx];
+	C[ty*width + tx] = M-N;
+}
+
+__global__ void mat_mult(float *A,float *B,float *C,int width)
+{
+	int tx = threadIdx.x;
+	int ty = threadIdx.y;
+	float Cvalue = 0;
+	for(int i=0;i<width;i++)
+	{
+		float M = A[ty*width + i];
+		float N = B[i*width + tx];
+		Cvalue += M*N;
+	}
+
+	C[ty*width + tx] = Cvalue;
+}
+
+
+//Single Thread
+void s_mat_add(float *A,float *B,float *C,int width)
+{
+	for(int i=0;i<width;i++)
+	{
+		for(int j=0;j<width;j++)
+		{
+			float M = A[i*width + j];
+	        float N = B[i*width + j];
+			C[i*width + j] = M+N;
+		}
+	}	
+}
+
+void s_mat_sub(float *A,float *B,float *C,int width)
+{
+	for(int i=0;i<width;i++)
+	{
+		for(int j=0;j<width;j++)
+		{
+			float M = A[i*width + j];
+	        float N = B[i*width + j];
+			C[i*width + j] = M-N;
+		}
+	}	
+}
+
+void s_mat_mul(float *A,float *B,float *C,int width)
+{
+		
+	float Cvalue = 0.0f;
+	for(int i=0;i<width;i++)
+	{
+		for(int j=0;j<width;j++)
+		{
+			for(int k=0;k<width;k++)
+			{
+				float M = A[i*width + k];
+	            float N = B[j + k*width];
+			    Cvalue += M*N;
+			}
+
+			C[i*width + j] = Cvalue;
+			Cvalue = 0.0f;
+		}	
+	}	
+
+	
 }
 
 int main()
 {
-    const int arraySize = 5;
-    const int a[arraySize] = { 1, 2, 3, 4, 5 };
-    const int b[arraySize] = { 10, 20, 30, 40, 50 };
-    int c[arraySize] = { 0 };
+	//Matrix for test
+	float *A,*B,*P;
+	int width = 5;
+	A = new float[width*width];
+    B = new float[width*width];
+	P = new float[width*width];
 
-    // Add vectors in parallel.
-    cudaError_t cudaStatus = addWithCuda(c, a, b, arraySize);
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "addWithCuda failed!");
-        return 1;
-    }
+    for(int i=0;i<width*width;i++)
+	{
+		A[i] = i;
+		B[i] = i;
+	}
 
-    printf("{1,2,3,4,5} + {10,20,30,40,50} = {%d,%d,%d,%d,%d}\n",
-        c[0], c[1], c[2], c[3], c[4]);
+	std::cout<<"Input1:"<<std::endl;
+	for(int i=0;i<width;i++)
+	{
+		for(int j=0;j<width;j++)
+		{
+			std::cout<<A[i*width + j]<<" ";
+		}
+		std::cout<<std::endl;
+	}
+	std::cout<<std::endl;
 
-    // cudaDeviceReset must be called before exiting in order for profiling and
-    // tracing tools such as Nsight and Visual Profiler to show complete traces.
-    cudaStatus = cudaDeviceReset();
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaDeviceReset failed!");
-        return 1;
-    }
+	std::cout<<"Input2:"<<std::endl;
+	for(int i=0;i<width;i++)
+	{
+		for(int j=0;j<width;j++)
+		{
+			std::cout<<B[i*width + j]<<" ";
+		}
+		std::cout<<std::endl;
+	}
+	std::cout<<std::endl;
 
+	float *Ad,*Bd,*Pd;
+	cudaMalloc((void**)&Ad,sizeof(float)*width*width);
+	cudaMalloc((void**)&Bd,sizeof(float)*width*width);
+	cudaMalloc((void**)&Pd,sizeof(float)*width*width);
+	cudaMemcpy(Ad, A, width*width * sizeof(int), cudaMemcpyHostToDevice);
+	cudaMemcpy(Bd, B, width*width * sizeof(int), cudaMemcpyHostToDevice);
+	dim3 dimBlock(width,width);
+	dim3 dimGrid(1,1);
+
+	//Add
+	mat_add<<<dimGrid,dimBlock>>> (Ad,Bd,Pd,width);
+	cudaMemcpy(P, Pd, width*width * sizeof(int), cudaMemcpyDeviceToHost);
+
+	std::cout<<"Add:"<<std::endl;
+	for(int i=0;i<width;i++)
+	{
+		for(int j=0;j<width;j++)
+		{
+			std::cout<<P[i*width + j]<<" ";
+		}
+		std::cout<<std::endl;
+	}
+	std::cout<<std::endl;
+	//Sub
+	mat_sub<<<dimGrid,dimBlock>>> (Ad,Bd,Pd,width);
+	cudaMemcpy(P, Pd, width*width * sizeof(int), cudaMemcpyDeviceToHost);
+
+	std::cout<<"Sub:"<<std::endl;
+	for(int i=0;i<width;i++)
+	{
+		for(int j=0;j<width;j++)
+		{
+			std::cout<<P[i*width + j]<<" ";
+		}
+		std::cout<<std::endl;
+	}
+	std::cout<<std::endl;
+
+	//Mul
+	mat_mult<<<dimGrid,dimBlock>>> (Ad,Bd,Pd,width);
+	cudaMemcpy(P, Pd, width*width * sizeof(int), cudaMemcpyDeviceToHost);
+
+	std::cout<<"Multiple:"<<std::endl;
+	for(int i=0;i<width;i++)
+	{
+		for(int j=0;j<width;j++)
+		{
+			std::cout<<P[i*width + j]<<" ";
+		}
+		std::cout<<std::endl;
+	}
+	std::cout<<std::endl;
+
+
+	//Add
+	std::cout<<"Single Thread:"<<std::endl;
+	s_mat_add(A,B,P,width);
+	std::cout<<"Add:"<<std::endl;
+	for(int i=0;i<width;i++)
+	{
+		for(int j=0;j<width;j++)
+		{
+			std::cout<<P[i*width + j]<<" ";
+		}
+		std::cout<<std::endl;
+	}
+	std::cout<<std::endl;
+
+	//Sub
+    s_mat_sub(A,B,P,width);
+	std::cout<<"Sub:"<<std::endl;
+	for(int i=0;i<width;i++)
+	{
+		for(int j=0;j<width;j++)
+		{
+			std::cout<<P[i*width + j]<<" ";
+		}
+		std::cout<<std::endl;
+	}
+	std::cout<<std::endl;
+
+
+	//Mul
+    s_mat_mul(A,B,P,width);
+	std::cout<<"Mul:"<<std::endl;
+	for(int i=0;i<width;i++)
+	{
+		for(int j=0;j<width;j++)
+		{
+			std::cout<<P[i*width + j]<<" ";
+		}
+		std::cout<<std::endl;
+	}
+	std::cout<<std::endl;
+
+	cudaFree(Ad);
+	cudaFree(Bd);
+	cudaFree(Pd);
     return 0;
-}
-
-// Helper function for using CUDA to add vectors in parallel.
-cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size)
-{
-    int *dev_a = 0;
-    int *dev_b = 0;
-    int *dev_c = 0;
-    cudaError_t cudaStatus;
-
-    // Choose which GPU to run on, change this on a multi-GPU system.
-    cudaStatus = cudaSetDevice(0);
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaSetDevice failed!  Do you have a CUDA-capable GPU installed?");
-        goto Error;
-    }
-
-    // Allocate GPU buffers for three vectors (two input, one output)    .
-    cudaStatus = cudaMalloc((void**)&dev_c, size * sizeof(int));
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMalloc failed!");
-        goto Error;
-    }
-
-    cudaStatus = cudaMalloc((void**)&dev_a, size * sizeof(int));
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMalloc failed!");
-        goto Error;
-    }
-
-    cudaStatus = cudaMalloc((void**)&dev_b, size * sizeof(int));
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMalloc failed!");
-        goto Error;
-    }
-
-    // Copy input vectors from host memory to GPU buffers.
-    cudaStatus = cudaMemcpy(dev_a, a, size * sizeof(int), cudaMemcpyHostToDevice);
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMemcpy failed!");
-        goto Error;
-    }
-
-    cudaStatus = cudaMemcpy(dev_b, b, size * sizeof(int), cudaMemcpyHostToDevice);
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMemcpy failed!");
-        goto Error;
-    }
-
-    // Launch a kernel on the GPU with one thread for each element.
-    addKernel<<<1, size>>>(dev_c, dev_a, dev_b);
-
-    // Check for any errors launching the kernel
-    cudaStatus = cudaGetLastError();
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "addKernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
-        goto Error;
-    }
-    
-    // cudaDeviceSynchronize waits for the kernel to finish, and returns
-    // any errors encountered during the launch.
-    cudaStatus = cudaDeviceSynchronize();
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaDeviceSynchronize returned error code %d after launching addKernel!\n", cudaStatus);
-        goto Error;
-    }
-
-    // Copy output vector from GPU buffer to host memory.
-    cudaStatus = cudaMemcpy(c, dev_c, size * sizeof(int), cudaMemcpyDeviceToHost);
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMemcpy failed!");
-        goto Error;
-    }
-
-Error:
-    cudaFree(dev_c);
-    cudaFree(dev_a);
-    cudaFree(dev_b);
-    
-    return cudaStatus;
 }

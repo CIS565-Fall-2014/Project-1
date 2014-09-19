@@ -86,6 +86,7 @@
     </CudaCompile>
     <CudaCompile>
       <Include>$(CudaToolkitIncludeDir)</Include>
+      <CodeGeneration>compute_20,sm_20</CodeGeneration>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
