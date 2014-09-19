@@ -3,368 +3,14 @@
 #include <stdio.h>
 #include <stdlib.h> 
 #include <assert.h>
+#include <iostream>
+using std::cout;
 
 const int width = 5; 
 int size = width * width * sizeof(float); 
 
-dim3 threadsPerBlock(width, width);
+dim3 threadsPerBlock(16, 16);
 dim3 numBlocks(1); 
-
-//float ** Ad; 
-//float ** Bd;
-//
-//float ** Cdadd; 
-//float ** Cdsub; 
-//float ** Cdmult; 
-//
-//float ** A; 
-//float ** B; 
-//
-//float ** Cadd; 
-//float ** Csub; 
-//float ** Cmult; 
-
-
-//// initialize matrices A and B
-//void initMat() 
-//{
-//	int index = 0; 
-//	for (int r = 0; r < width; r++) 
-//	{
-//		for (int c = 0; c < width; c++) 
-//		{
-//			A[r][c] = index; 
-//			B[r][c] = index; 
-//			index++; 
-//		}
-//	}
-//}
-//
-//__global__ void mat_add_kernel(float** M[width][width], float** N[width][width], float** P[width][width]) 
-//{
-//	// 2D thread ID 
-//	int tx = threadIdx.x; 
-//	int ty = threadIdx.y; 
-//
-//	P[ty][tx] = M[ty][tx] + N[ty][tx]; 
-//}
-//
-//void mat_add(float** M, float** N, float** P) 
-//{
-//	mat_add_kernel<<<numBlocks, threadsPerBlock>>>(M, N, P);
-//}
-//
-//__global__ void mat_sub_kernel(float** M[width][width], float** N[width][width], float** P[width][width]) 
-//{
-//	// 2D thread ID 
-//	int tx = threadIdx.x; 
-//	int ty = threadIdx.y; 
-//
-//	P[ty][tx] = M[ty][tx] - N[ty][tx]; 
-//}
-//
-//void mat_sub(float** M, float** N, float** P) 
-//{
-//	mat_sub_kernel<<<numBlocks, threadsPerBlock>>>(M, N, P);
-//}
-//
-//__global__ void mat_mult_kernel(float** M, float** N, float** P) 
-//{
-//	// 2D thread ID 
-//	int tx = threadIdx.x; 
-//	int ty = threadIdx.y; 
-//
-//
-//	float sum = 0.0f; 
-//	for (int i = 0; i < width; i++) 
-//	{
-//		sum += (M[ty][i]*N[i][tx]); 
-//	}
-//	P[ty][tx] = sum; 
-//}
-//
-//void mat_mult(float** M, float** N, float** P) 
-//{
-//	mat_mult_kernel<<<numBlocks, threadsPerBlock>>>(M, N, P);
-//}
-//
-//
-//
-///* serial versions of:  
-//	mat_add 
-//	mat_sub 
-//	mat_mult */ 
-//
-//void mat_add_serial(float** M, float** N, float** P) 
-//{
-//	for (int r = 0; r < width; r++) 
-//	{
-//		for (int c = 0; c < width; c++) 
-//		{
-//			P[r][c] = M[r][c] + N[r][c]; 
-//		}
-//	}
-//}
-//
-//void mat_sub_serial(float** M, float** N, float** P) 
-//{
-//	for (int r = 0; r < width; r++) 
-//	{
-//		for (int c = 0; c < width; c++) 
-//		{
-//			P[r][c] = M[r][c] - N[r][c]; 
-//		}
-//	}
-//}
-//
-//void mat_mult_serial(float** M, float** N, float** P) 
-//{
-//	for (int r = 0; r < width; r++) 
-//	{
-//		for (int c = 0; c < width; c++) 
-//		{
-//			float sum = 0.0f; 
-//			for (int i = 0; i < width; i++) 
-//			{
-//				sum += (M[r][i]*N[i][c]); 
-//			}
-//			P[r][c] = sum; 
-//		}
-//	}
-//}
-//
-//int main() 
-//{
-//	// set up memory and data transfer 
-//	cudaMalloc((void**)&Ad, size); 
-//	cudaMemcpy(Ad, A, size, cudaMemcpyHostToDevice); 
-//
-//	cudaMalloc((void**)&Bd, size); 
-//	cudaMemcpy((void**)&Bd, B, size, cudaMemcpyHostToDevice); 
-//
-//	cudaMalloc((void**)&Cdadd, size); 
-//	cudaMalloc((void**)&Cdsub, size); 
-//	cudaMalloc((void**)&Cdmult, size); 
-//
-//	// initialize matrices
-//	initMat(); 
-//
-//	// add, subtract, and multiply matrices
-//	mat_add(Ad, Bd, Cdadd); 
-//	//mat_sub(Ad, Bd, Cdsub); 
-//	//mat_mult(Ad, Bd, Cdmult); 
-//
-//	// serial add, subtract, multiply 
-//	//mat_add_serial(A, B, Cadd); 
-//	//mat_sub_serial(A, B, Csub); 
-//	//mat_mult_serial(A, B, Cmult); 
-//
-//	// assert
-//	assert(check_add); 
-//	assert(check_sub); 
-//	assert(check_mult); 
-//
-//	cudaMemcpy(Cadd, Cdadd, size, cudaMemcpyDeviceToHost); 
-//	cudaMemcpy(Csub, Cdsub, size, cudaMemcpyDeviceToHost); 
-//	cudaMemcpy(Cmult, Cdmult, size, cudaMemcpyDeviceToHost); 
-//
-//	int test = 101; 
-//
-//	cudaFree(Ad); 
-//	cudaFree(Bd); 
-//	cudaFree(Cdadd); 
-//	cudaFree(Cdsub); 
-//	cudaFree(Cdmult); 
-//
-//	return 0;
-//}
-
-/*float Ad[width][width]; 
-float Bd[width][width];
-
-float Cdadd[width][width]; 
-float Cdsub[width][width]; 
-float Cdmult[width][width]; */
-
-//float A[width][width]; 
-//float B[width][width]; 
-//
-//float Cadd[width][width]; 
-//float Csub[width][width]; 
-//float Cmult[width][width]; 
-//
-//float * A_ptr = &(A[0][0]); 
-//float * B_ptr = &(B[0][0]); 
-//float * Cadd_ptr = &(Cadd[0][0]); 
-//float * Csub_ptr = &(Csub[0][0]); 
-//float * Cmult_ptr = &(Cmult[0][0]); 
-//
-//float * Ad; 
-//float * Bd; 
-//float * Cdadd; 
-//float * Cdsub; 
-//float * Cdmult; 
-//
-//
-//// initialize matrices A and B
-//void initMat() 
-//{
-//	int index = 0; 
-//	for (int r = 0; r < width; r++) 
-//	{
-//		for (int c = 0; c < width; c++) 
-//		{
-//			A[r][c] = index; 
-//			B[r][c] = index; 
-//			index++; 
-//		}
-//	}
-//}
-//
-//__global__ void mat_add_kernel(float * M, float * N, float * P) 
-//{
-//	// 2D thread ID 
-//	int tx = threadIdx.x; 
-//	int ty = threadIdx.y; 
-//	P[ty*width+tx] = M[ty*width+tx] + N[ty*width+tx]; 
-//}
-//
-//void mat_add(float * M, float * N, float * P) 
-//{
-//	mat_add_kernel<<<numBlocks, threadsPerBlock>>>(M, N, P);
-//	fprintf(stderr, "%f\n", M[0]); 
-//	fprintf(stderr, "%f\n", M[1]);
-//	fprintf(stderr, "%f\n", M[2]);
-//	fprintf(stderr, "%f\n", M[3]);
-//	fprintf(stderr, "%f\n", M[4]);
-//}
-//
-//__global__ void mat_sub_kernel(float * M, float * N, float * P) 
-//{
-//	// 2D thread ID 
-//	int tx = threadIdx.x; 
-//	int ty = threadIdx.y; 
-//
-//	P[ty*width+tx] = M[ty*width+tx] - N[ty*width+tx]; 
-//}
-//
-//void mat_sub(float * M, float * N, float * P) 
-//{
-//	mat_sub_kernel<<<numBlocks, threadsPerBlock>>>(M, N, P);
-//}
-//
-//__global__ void mat_mult_kernel(float * M, float * N, float * P) 
-//{
-//	// 2D thread ID 
-//	int tx = threadIdx.x; 
-//	int ty = threadIdx.y; 
-//
-//
-//	float sum = 0.0f; 
-//	for (int i = 0; i < width; i++) 
-//	{
-//		sum += (M[ty*width+i]*N[i*width+tx]); 
-//	}
-//	P[ty*width+tx] = sum; 
-//}
-//
-//void mat_mult(float * M, float * N, float * P) 
-//{
-//	mat_mult_kernel<<<numBlocks, threadsPerBlock>>>(M, N, P);
-//}
-//
-//
-//
-///* serial versions of:  
-//	mat_add 
-//	mat_sub 
-//	mat_mult */ 
-//
-//void mat_add_serial(float M[width][width], float N[width][width], float P[width][width]) 
-//{
-//	for (int r = 0; r < width; r++) 
-//	{
-//		for (int c = 0; c < width; c++) 
-//		{
-//			P[r][c] = M[r][c] + N[r][c]; 
-//		}
-//	}
-//}
-//
-//void mat_sub_serial(float M[width][width], float N[width][width], float P[width][width]) 
-//{
-//	for (int r = 0; r < width; r++) 
-//	{
-//		for (int c = 0; c < width; c++) 
-//		{
-//			P[r][c] = M[r][c] - N[r][c]; 
-//		}
-//	}
-//}
-//
-//void mat_mult_serial(float M[width][width], float N[width][width], float P[width][width]) 
-//{
-//	for (int r = 0; r < width; r++) 
-//	{
-//		for (int c = 0; c < width; c++) 
-//		{
-//			float sum = 0.0f; 
-//			for (int i = 0; i < width; i++) 
-//			{
-//				sum += (M[r][i]*N[i][c]); 
-//			}
-//			P[r][c] = sum; 
-//		}
-//	}
-//}
-//
-//int main() 
-//{
-//	// initialize matrices on CPU
-//	initMat(); 
-//
-//	// set up memory and data transfer 
-//	cudaMalloc((void**)&Ad, size); 
-//	cudaMemcpy(Ad, A_ptr, size, cudaMemcpyHostToDevice); 
-//
-//	cudaMalloc((void**)&Bd, size); 
-//	cudaMemcpy(Bd, B_ptr, size, cudaMemcpyHostToDevice); 
-//
-//	cudaMalloc((void**)&Cdadd, size); 
-//	cudaMalloc((void**)&Cdsub, size); 
-//	cudaMalloc((void**)&Cdmult, size); 
-//
-//	fprintf(stderr, "%f\n", Ad[1]); 
-//
-//	
-//
-//	// add, subtract, and multiply matrices
-//	mat_add(Ad, Bd, Cdadd); 
-//	//mat_sub(Ad, Bd, Cdsub); 
-//	//mat_mult(Ad, Bd, Cdmult); 
-//
-//	// serial add, subtract, multiply 
-//	//mat_add_serial(A, B, Cadd); 
-//	//mat_sub_serial(A, B, Csub); 
-//	//mat_mult_serial(A, B, Cmult); 
-//
-//	// assert
-//	//assert(check_add); 
-//	//assert(check_sub); 
-//	//assert(check_mult); 
-//
-//	cudaMemcpy(Cadd, Cdadd, size, cudaMemcpyDeviceToHost); 
-//	//cudaMemcpy(Csub, Cdsub, size, cudaMemcpyDeviceToHost); 
-//	//cudaMemcpy(Cmult, Cdmult, size, cudaMemcpyDeviceToHost); 
-//
-//	cudaFree(Ad); 
-//	cudaFree(Bd); 
-//	cudaFree(Cdadd); 
-//	cudaFree(Cdsub); 
-//	cudaFree(Cdmult); 
-//
-//	return 0;
-//}
 
 float * Ad; 
 float * Bd;
@@ -396,7 +42,8 @@ void initMat()
 	}
 }
 
-__global__ void mat_add_kernel(float* M, float* N, float* P) 
+// matrix addition kernel
+__global__ void mat_add_kernel(float* M, float* N, float* P, int width) 
 {
 	// 2D thread ID 
 	int tx = threadIdx.x; 
@@ -405,13 +52,8 @@ __global__ void mat_add_kernel(float* M, float* N, float* P)
 	P[ty*width+tx] = M[ty*width+tx] + N[ty*width+tx]; 
 }
 
-void mat_add(float* M, float* N, float* P) 
-{
-	mat_add_kernel<<<numBlocks, threadsPerBlock>>>(M, N, P);
-	//fprintf(stderr, "%f\n", M[0]); 
-}
-
-__global__ void mat_sub_kernel(float* M, float* N, float* P) 
+// matrix subtraction kernel
+__global__ void mat_sub_kernel(float* M, float* N, float* P, int width) 
 {
 	// 2D thread ID 
 	int tx = threadIdx.x; 
@@ -420,12 +62,8 @@ __global__ void mat_sub_kernel(float* M, float* N, float* P)
 	P[ty*width+tx] = M[ty*width+tx] - N[ty*width+tx]; 
 }
 
-void mat_sub(float* M, float* N, float* P) 
-{
-	mat_sub_kernel<<<numBlocks, threadsPerBlock>>>(M, N, P);
-}
-
-__global__ void mat_mult_kernel(float* M, float* N, float* P) 
+// matrix multiplication kernel
+__global__ void mat_mult_kernel(float* M, float* N, float* P, int width) 
 {
 	// 2D thread ID 
 	int tx = threadIdx.x; 
@@ -439,12 +77,6 @@ __global__ void mat_mult_kernel(float* M, float* N, float* P)
 	}
 	P[ty*width+tx] = sum; 
 }
-
-void mat_mult(float* M, float* N, float* P) 
-{
-	mat_mult_kernel<<<numBlocks, threadsPerBlock>>>(M, N, P);
-}
-
 
 
 // serial versions of mat_add, mat_sub, and mat_mult  
@@ -487,84 +119,84 @@ void mat_mult_serial(float* M, float* N, float* P)
 	}
 }
 
-bool check_add(float* M)
-{
-	float ep = 0.0000001f; 
-	float M_add[] = {0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48}; 
-	for (int i = 0; i < width*width; i++) 
-	{
-		if (M[i] - M_add[i] > ep) return false;
-	}
-	return true; 
-}
-
-bool check_sub(float* M)
-{
-	float ep = 0.0000001f; 
-	for (int i = 0; i < width*width; i++) 
-	{
-		if (M[i] > ep) return false;
-	}
-	return true; 
-}
-
-bool check_mult(float* M)
-{
-	float ep = 0.0000001f; 
-	float M_add[] = {150, 160, 170, 180, 190, 400, 435, 470, 505, 540, 650, 710, 770, 830, 890, 900, 985, 1070, 1155, 1240, 1150, 1260, 1370, 1480, 1590}; 
-	for (int i = 0; i < width*width; i++) 
-	{
-		if (M[i] - M_add[i] > ep) return false;
-	}
-	return true; 
-}
-
 int main() 
 {
-	// set up memory and data transfer 
+	// initialize matrices
 	A = new float[width*width];  
 	B = new float[width*width];  
 	Cadd = new float[width*width];  
 	Csub = new float[width*width];  
 	Cmult = new float[width*width];  
 
+	// populate matrices A and B
+	initMat(); 
+
+	// set up memory and data transfer 
 	cudaMalloc((void**)&Ad, size); 
-	cudaMemcpy(&Ad, &A, size, cudaMemcpyHostToDevice); 
+	cudaMemcpy(Ad, A, size, cudaMemcpyHostToDevice); 
 
 	cudaMalloc((void**)&Bd, size); 
-	cudaMemcpy(&Bd, &B, size, cudaMemcpyHostToDevice); 
+	cudaMemcpy(Bd, B, size, cudaMemcpyHostToDevice); 
 
 	cudaMalloc((void**)&Cdadd, size); 
 	cudaMalloc((void**)&Cdsub, size); 
 	cudaMalloc((void**)&Cdmult, size); 
 
-	// initialize matrices
-	initMat(); 
-
 	// add, subtract, and multiply matrices
-	mat_add(Ad, Bd, Cdadd); 
-	//mat_sub(Ad, Bd, Cdsub); 
-	//mat_mult(Ad, Bd, Cdmult); 
-
-	// serial add, subtract, multiply 
-	//mat_add_serial(A, B, Cadd); 
-	//mat_sub_serial(A, B, Csub); 
-	//mat_mult_serial(A, B, Cmult); 
-
-	// assert
-	assert(check_add); 
-	assert(check_sub); 
-	assert(check_mult); 
-
+	mat_add_kernel<<<numBlocks, threadsPerBlock>>>(Ad, Bd, Cdadd, width);
 	cudaMemcpy(Cadd, Cdadd, size, cudaMemcpyDeviceToHost); 
-	//cudaMemcpy(Csub, Cdsub, size, cudaMemcpyDeviceToHost); 
-	//cudaMemcpy(Cmult, Cdmult, size, cudaMemcpyDeviceToHost); 
+	std::cout<<Cadd[0];std::cout<<" "; std::cout<<Cadd[1];std::cout<<" "; std::cout<<Cadd[2];std::cout<<" "; std::cout<<Cadd[3];std::cout<<" "; std::cout<<Cadd[4];std::cout<<"\n"; 
+	std::cout<<Cadd[5];std::cout<<" "; std::cout<<Cadd[6];std::cout<<" "; std::cout<<Cadd[7];std::cout<<" "; std::cout<<Cadd[8];std::cout<<" "; std::cout<<Cadd[9];std::cout<<"\n"; 
+	std::cout<<Cadd[10];std::cout<<" "; std::cout<<Cadd[11];std::cout<<" "; std::cout<<Cadd[12];std::cout<<" "; std::cout<<Cadd[13];std::cout<<" "; std::cout<<Cadd[14];std::cout<<"\n"; 
+	std::cout<<Cadd[15];std::cout<<" "; std::cout<<Cadd[16];std::cout<<" "; std::cout<<Cadd[17];std::cout<<" "; std::cout<<Cadd[18];std::cout<<" "; std::cout<<Cadd[19];std::cout<<"\n"; 
+	std::cout<<Cadd[20];std::cout<<" "; std::cout<<Cadd[21];std::cout<<" "; std::cout<<Cadd[22];std::cout<<" "; std::cout<<Cadd[23];std::cout<<" "; std::cout<<Cadd[24];std::cout<<"\n"; 
 
+	mat_sub_kernel<<<numBlocks, threadsPerBlock>>>(Ad, Bd, Cdsub, width);
+	cudaMemcpy(Csub, Cdsub, size, cudaMemcpyDeviceToHost); 
+	std::cout<<Csub[0];std::cout<<" "; std::cout<<Csub[1];std::cout<<" "; std::cout<<Csub[2];std::cout<<" "; std::cout<<Csub[3];std::cout<<" "; std::cout<<Csub[4];std::cout<<"\n"; 
+	std::cout<<Csub[5];std::cout<<" "; std::cout<<Csub[6];std::cout<<" "; std::cout<<Csub[7];std::cout<<" "; std::cout<<Csub[8];std::cout<<" "; std::cout<<Csub[9];std::cout<<"\n"; 
+	std::cout<<Csub[10];std::cout<<" "; std::cout<<Csub[11];std::cout<<" "; std::cout<<Csub[12];std::cout<<" "; std::cout<<Csub[13];std::cout<<" "; std::cout<<Csub[14];std::cout<<"\n"; 
+	std::cout<<Csub[15];std::cout<<" "; std::cout<<Csub[16];std::cout<<" "; std::cout<<Csub[17];std::cout<<" "; std::cout<<Csub[18];std::cout<<" "; std::cout<<Csub[19];std::cout<<"\n"; 
+	std::cout<<Csub[20];std::cout<<" "; std::cout<<Csub[21];std::cout<<" "; std::cout<<Csub[22];std::cout<<" "; std::cout<<Csub[23];std::cout<<" "; std::cout<<Csub[24];std::cout<<"\n"; 
+
+	mat_mult_kernel<<<numBlocks, threadsPerBlock>>>(Ad, Bd, Cdmult, width);
+	cudaMemcpy(Cmult, Cdmult, size, cudaMemcpyDeviceToHost); 
+	std::cout<<Cmult[0];std::cout<<" "; std::cout<<Cmult[1];std::cout<<" "; std::cout<<Cmult[2];std::cout<<" "; std::cout<<Cmult[3];std::cout<<" "; std::cout<<Cmult[4];std::cout<<"\n"; 
+	std::cout<<Cmult[5];std::cout<<" "; std::cout<<Cmult[6];std::cout<<" "; std::cout<<Cmult[7];std::cout<<" "; std::cout<<Cmult[8];std::cout<<" "; std::cout<<Cmult[9];std::cout<<"\n"; 
+	std::cout<<Cmult[10];std::cout<<" "; std::cout<<Cmult[11];std::cout<<" "; std::cout<<Cmult[12];std::cout<<" "; std::cout<<Cmult[13];std::cout<<" "; std::cout<<Cmult[14];std::cout<<"\n"; 
+	std::cout<<Cmult[15];std::cout<<" "; std::cout<<Cmult[16];std::cout<<" "; std::cout<<Cmult[17];std::cout<<" "; std::cout<<Cmult[18];std::cout<<" "; std::cout<<Cmult[19];std::cout<<"\n"; 
+	std::cout<<Cmult[20];std::cout<<" "; std::cout<<Cmult[21];std::cout<<" "; std::cout<<Cmult[22];std::cout<<" "; std::cout<<Cmult[23];std::cout<<" "; std::cout<<Cmult[24];std::cout<<"\n"; 
+
+	// free suda memory 
 	cudaFree(Ad); 
 	cudaFree(Bd); 
 	cudaFree(Cdadd); 
 	cudaFree(Cdsub); 
 	cudaFree(Cdmult); 
+
+	// serial add, subtract, multiply 
+	mat_add_serial(A, B, Cadd); 
+	mat_sub_serial(A, B, Csub); 
+	mat_mult_serial(A, B, Cmult); 
+
+	std::cout<<Cadd[0];std::cout<<" "; std::cout<<Cadd[1];std::cout<<" "; std::cout<<Cadd[2];std::cout<<" "; std::cout<<Cadd[3];std::cout<<" "; std::cout<<Cadd[4];std::cout<<"\n"; 
+	std::cout<<Cadd[5];std::cout<<" "; std::cout<<Cadd[6];std::cout<<" "; std::cout<<Cadd[7];std::cout<<" "; std::cout<<Cadd[8];std::cout<<" "; std::cout<<Cadd[9];std::cout<<"\n"; 
+	std::cout<<Cadd[10];std::cout<<" "; std::cout<<Cadd[11];std::cout<<" "; std::cout<<Cadd[12];std::cout<<" "; std::cout<<Cadd[13];std::cout<<" "; std::cout<<Cadd[14];std::cout<<"\n"; 
+	std::cout<<Cadd[15];std::cout<<" "; std::cout<<Cadd[16];std::cout<<" "; std::cout<<Cadd[17];std::cout<<" "; std::cout<<Cadd[18];std::cout<<" "; std::cout<<Cadd[19];std::cout<<"\n"; 
+	std::cout<<Cadd[20];std::cout<<" "; std::cout<<Cadd[21];std::cout<<" "; std::cout<<Cadd[22];std::cout<<" "; std::cout<<Cadd[23];std::cout<<" "; std::cout<<Cadd[24];std::cout<<"\n"; 
+
+	std::cout<<Csub[0];std::cout<<" "; std::cout<<Csub[1];std::cout<<" "; std::cout<<Csub[2];std::cout<<" "; std::cout<<Csub[3];std::cout<<" "; std::cout<<Csub[4];std::cout<<"\n"; 
+	std::cout<<Csub[5];std::cout<<" "; std::cout<<Csub[6];std::cout<<" "; std::cout<<Csub[7];std::cout<<" "; std::cout<<Csub[8];std::cout<<" "; std::cout<<Csub[9];std::cout<<"\n"; 
+	std::cout<<Csub[10];std::cout<<" "; std::cout<<Csub[11];std::cout<<" "; std::cout<<Csub[12];std::cout<<" "; std::cout<<Csub[13];std::cout<<" "; std::cout<<Csub[14];std::cout<<"\n"; 
+	std::cout<<Csub[15];std::cout<<" "; std::cout<<Csub[16];std::cout<<" "; std::cout<<Csub[17];std::cout<<" "; std::cout<<Csub[18];std::cout<<" "; std::cout<<Csub[19];std::cout<<"\n"; 
+	std::cout<<Csub[20];std::cout<<" "; std::cout<<Csub[21];std::cout<<" "; std::cout<<Csub[22];std::cout<<" "; std::cout<<Csub[23];std::cout<<" "; std::cout<<Csub[24];std::cout<<"\n"; 
+
+	std::cout<<Cmult[0];std::cout<<" "; std::cout<<Cmult[1];std::cout<<" "; std::cout<<Cmult[2];std::cout<<" "; std::cout<<Cmult[3];std::cout<<" "; std::cout<<Cmult[4];std::cout<<"\n"; 
+	std::cout<<Cmult[5];std::cout<<" "; std::cout<<Cmult[6];std::cout<<" "; std::cout<<Cmult[7];std::cout<<" "; std::cout<<Cmult[8];std::cout<<" "; std::cout<<Cmult[9];std::cout<<"\n"; 
+	std::cout<<Cmult[10];std::cout<<" "; std::cout<<Cmult[11];std::cout<<" "; std::cout<<Cmult[12];std::cout<<" "; std::cout<<Cmult[13];std::cout<<" "; std::cout<<Cmult[14];std::cout<<"\n"; 
+	std::cout<<Cmult[15];std::cout<<" "; std::cout<<Cmult[16];std::cout<<" "; std::cout<<Cmult[17];std::cout<<" "; std::cout<<Cmult[18];std::cout<<" "; std::cout<<Cmult[19];std::cout<<"\n"; 
+	std::cout<<Cmult[20];std::cout<<" "; std::cout<<Cmult[21];std::cout<<" "; std::cout<<Cmult[22];std::cout<<" "; std::cout<<Cmult[23];std::cout<<" "; std::cout<<Cmult[24];std::cout<<"\n"; 
+
 
 	return 0;
 }
