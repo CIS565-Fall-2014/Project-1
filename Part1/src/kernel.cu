@@ -83,25 +83,48 @@ __global__ void generateCircularVelArray(int time, int N, glm::vec3 * arr, glm::
     }
 }
 
+__device__ glm::vec3 calcForce(float m_o, glm::vec3 p_i, glm::vec3 p_o)
+{
+    glm::vec3 r = p_o - p_i;
+    float R = glm::length(r);
+    if (R < 1) {
+        return glm::vec3();
+    } else {
+        return (m_o / (R * R * R)) * r;
+    }
+}
+
 // TODO: Core force calc kernel global memory
 //		 HINT : You may want to write a helper function that will help you 
 //              calculate the acceleration contribution of a single body.
 //		 REMEMBER : F = (G * m_a * m_b) / (r_ab ^ 2)
 __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 {
-    return glm::vec3(0.0f);
+    glm::vec3 p = glm::vec3(my_pos);
+    glm::vec3 F;
+
+    F += calcForce(starMass, p, glm::vec3());
+    for (int o = 0; o < N; ++o) {
+        F += calcForce(planetMass, p, glm::vec3(their_pos[o]));
+    }
+
+    float _G = G;
+    return F * _G;
 }
 
 // TODO : update the acceleration of each body
 __global__ void updateF(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
-	// FILL IN HERE
+    int i = threadIdx.x + (blockIdx.x * blockDim.x);
+    acc[i] = accelerate(N, pos[i], pos);
 }
 
 // TODO : update velocity and position using a simple Euler integration scheme
 __global__ void updateS(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
-	// FILL IN HERE
+    int i = threadIdx.x + (blockIdx.x * blockDim.x);
+    vel[i] += dt * acc[i];
+    pos[i] += glm::vec4(dt * vel[i], 0);
 }
 
 // Update the vertex buffer object
@@ -179,7 +202,10 @@ void initCuda(int N)
 // TODO : Using the functions you wrote above, write a function that calls the CUDA kernels to update a single sim step
 void cudaNBodyUpdateWrapper(float dt)
 {
-	// FILL IN HERE
+    dim3 fullBlocksPerGrid((int)ceil(float(numObjects)/float(blockSize)));
+
+    updateF<<<fullBlocksPerGrid, blockSize>>>(numObjects, dt, dev_pos, dev_vel, dev_acc);
+    updateS<<<fullBlocksPerGrid, blockSize>>>(numObjects, dt, dev_pos, dev_vel, dev_acc);
 }
 
 void cudaUpdateVBO(float * vbodptr, int width, int height)
