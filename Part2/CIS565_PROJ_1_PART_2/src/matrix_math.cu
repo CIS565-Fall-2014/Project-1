@@ -408,7 +408,7 @@ __global__ void mat_add_kernel(float* M, float* N, float* P)
 void mat_add(float* M, float* N, float* P) 
 {
 	mat_add_kernel<<<numBlocks, threadsPerBlock>>>(M, N, P);
-	fprintf(stderr, "%f\n", M[0]);
+	//fprintf(stderr, "%f\n", M[0]); 
 }
 
 __global__ void mat_sub_kernel(float* M, float* N, float* P) 
