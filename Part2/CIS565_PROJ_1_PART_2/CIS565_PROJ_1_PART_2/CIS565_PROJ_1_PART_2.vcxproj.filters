@@ -19,9 +19,4 @@
       <Filter>Source Files</Filter>
     </CudaCompile>
   </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\src\main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
 </Project>

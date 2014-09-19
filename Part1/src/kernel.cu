@@ -99,13 +99,13 @@ __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 	// loop through planets 
 	for (int i = 0; i < N; i++)
 	{
-		if (glm::length(r_ab) > 0.0f) 
-		{
 		r_ab = their_pos[i]-my_pos; 
-		r_ab_dir = glm::vec3(r_ab.x, r_ab.y, r_ab.z); 
-		glm::normalize(r_ab_dir); 
-		Fmag = G*my_pos.w*their_pos[i].w/(pow(glm::length(r_ab),2)+EPSILON); 
-		F += glm::vec3(r_ab_dir.x*Fmag, r_ab_dir.y*Fmag, r_ab_dir.z*Fmag); 
+		if (glm::length(r_ab) > EPSILON) 
+		{
+			r_ab_dir = glm::vec3(r_ab.x, r_ab.y, r_ab.z); 
+			glm::normalize(r_ab_dir); 
+			Fmag = G*my_pos.w*their_pos[i].w/(pow(glm::length(r_ab),2)+EPSILON); 
+			F += glm::vec3(r_ab_dir.x*Fmag, r_ab_dir.y*Fmag, r_ab_dir.z*Fmag); 
 		}
 	}
 
@@ -115,7 +115,7 @@ __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 	glm::normalize(r_sun);
 	F += glm::vec3(r_sun.x*Fmag, r_sun.y*Fmag, r_sun.z*Fmag); 
 
-    return F;
+    return F/my_pos.w;
 }
 
 // TODO : update the acceleration of each body
@@ -126,7 +126,7 @@ __global__ void updateF(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::
 
 	if(index < N)
     {
-		acc[index] += accelerate(N, pos[index], pos)/pos[index].w; 
+		acc[index] += accelerate(N, pos[index], pos); 
 	}
 }
 
