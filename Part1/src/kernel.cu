@@ -89,19 +89,60 @@ __global__ void generateCircularVelArray(int time, int N, glm::vec3 * arr, glm::
 //		 REMEMBER : F = (G * m_a * m_b) / (r_ab ^ 2)
 __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 {
-    return glm::vec3(0.0f);
+	glm::vec3 F = glm::vec3(0.0f);
+	float Fmag = 0.0f; 
+	glm::vec4 r_ab; 
+	glm::vec3 r_ab_dir;
+
+	int index = threadIdx.x + (blockIdx.x * blockDim.x);
+
+	// loop through planets 
+	for (int i = 0; i < N; i++)
+	{
+		r_ab = their_pos[i]-my_pos; 
+		if (i != index) 
+		{
+			r_ab_dir = glm::vec3(r_ab.x, r_ab.y, r_ab.z); 
+			glm::normalize(r_ab_dir); 
+			Fmag = G*my_pos.w*their_pos[i].w/(pow(glm::length(r_ab),2)+EPSILON); 
+			F += glm::vec3(r_ab_dir.x*Fmag, r_ab_dir.y*Fmag, r_ab_dir.z*Fmag); 
+		}
+	}
+
+	// add force from the sun (at 0,0,0)
+	glm::vec3 r_sun = glm::vec3(-my_pos.x, -my_pos.y, -my_pos.z); 
+	Fmag = G*my_pos.w*starMass/(pow(glm::length(r_sun),2)+EPSILON); 
+	glm::normalize(r_sun);
+	F += glm::vec3(r_sun.x*Fmag, r_sun.y*Fmag, r_sun.z*Fmag); 
+
+    return F/my_pos.w;
 }
 
 // TODO : update the acceleration of each body
 __global__ void updateF(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
-	// FILL IN HERE
+	// thread ID 
+	int index = threadIdx.x + (blockIdx.x * blockDim.x);
+
+	if(index < N)
+    {
+		acc[index] += accelerate(N, pos[index], pos); 
+	}
 }
 
 // TODO : update velocity and position using a simple Euler integration scheme
 __global__ void updateS(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
-	// FILL IN HERE
+	// thread ID 
+	int index = threadIdx.x + (blockIdx.x * blockDim.x);
+
+	if(index < N)
+    {
+		vel[index] += acc[index]*dt;
+		pos[index].x += vel[index].x*dt;
+		pos[index].y += vel[index].y*dt;
+		pos[index].z += vel[index].z*dt;
+	}
 }
 
 // Update the vertex buffer object
@@ -179,7 +220,13 @@ void initCuda(int N)
 // TODO : Using the functions you wrote above, write a function that calls the CUDA kernels to update a single sim step
 void cudaNBodyUpdateWrapper(float dt)
 {
-	// FILL IN HERE
+	dim3 fullBlocksPerGrid((int)ceil(float(numObjects)/float(blockSize)));
+
+    updateF<<<fullBlocksPerGrid, blockSize>>>(numObjects, dt, dev_pos, dev_vel, dev_acc);
+    cudaThreadSynchronize();
+
+	updateS<<<fullBlocksPerGrid, blockSize>>>(numObjects, dt, dev_pos, dev_vel, dev_acc);
+    cudaThreadSynchronize();
 }
 
 void cudaUpdateVBO(float * vbodptr, int width, int height)
