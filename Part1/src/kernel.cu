@@ -100,7 +100,7 @@ __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 	for (int i = 0; i < N; i++)
 	{
 		r_ab = their_pos[i]-my_pos; 
-		if (glm::length(r_ab) > EPSILON) 
+		if (i != index) 
 		{
 			r_ab_dir = glm::vec3(r_ab.x, r_ab.y, r_ab.z); 
 			glm::normalize(r_ab_dir); 
