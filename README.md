@@ -1,28 +1,37 @@
 
 # Performance analysis: 
 
-1. Changing the block size has some impact on the performance on the lower end:
+Changing the block size has some impact on the performance on the lower end:
 
 N = 5000, blockSize = 32: 0.90 fps 
+
 N = 5000, blocksize = 64: 1.20 fps 
+
 N = 5000, blocksize = 128: 1.23 fps 
+
 N = 5000, blockSize = 256: 1.22 fps 
+
 N = 5000, blockSize = 512: 1.21 fps 
+
 N = 5000, blockSize = 1024: 1.20 fps
 
 There seems to be an optimal block size. The block size controls the number of threads, that is the number of operations that executed in parallel. It makes sense that on the lower end, when there are less threads than there are, since this was evaluated at N = 5000, and we have a 2d block. Between 64 and 128 seems to be the turning point, which makes sense, because from 128 and higher, there is no purpose in having the extra threads, and they may in fact be marginally detrimental for performance. 
 
-2. Changing the number of planets has an almost inversely proportional effect on the performance, with the fps halving as N is doubled. 
+Changing the number of planets has an almost inversely proportional effect on the performance, with the fps halving as N is doubled. 
 
 N = 10000, blockSize = 128: 0.64 fps 
+
 N = 5000, blockSize = 128: 1.25 fps 
+
 N = 2000, blockSize = 128: 2.86 fps 
+
 N = 1000, blockSize = 128: 5.00 fps 
+
 N = 500, blockSize = 128: 5.60 fps
 
 This relationship makes sense, because there was still one function that required looping through all the planets, for the summing of the forces from the neighboring bodies. It makes sense that for lower N, the effect is lesser, accounting for the overhead time for GPU computing. 
 
-3. I would expect the serial and GPU versions of matrix_math to be comparable, with perhaps the serial version working faster, because it is a relatively small computation for a 5x5 matrix (I could do it by hand). It is likely not computationally expensive enough to warrant using the GPU, which has a fair amount of overhead time to set up memory and functions. 
+I would expect the serial and GPU versions of matrix_math to be comparable, with perhaps the serial version working faster, because it is a relatively small computation for a 5x5 matrix (I could do it by hand). It is likely not computationally expensive enough to warrant using the GPU, which has a fair amount of overhead time to set up memory and functions. 
 
 
 
