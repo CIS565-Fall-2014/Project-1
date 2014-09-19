@@ -47,7 +47,7 @@ set(CUDA_SEPARABLE_COMPILATION ON)
 
 #Make NVCC run silently
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-	set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS}-w;")
+    #set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS}-w;")
 endif()
 
 #Force Visual Studio to link against MT versions of libs
