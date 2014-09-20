@@ -18,11 +18,13 @@ NOTE : Performance should be measured in comparison to a baseline.  Be sure to
 describe the changes you make between experiments and how you are benchmarking.
 
 * How does changing the tile and block sizes change performance? Why?
-The number of tile and block sizes depend on the program and graphic cards. We cannot set block size too big also not too small. But the number of threads per block must be a multiple of 32 which is the warp size. Also each SM unit on the GPU must have enough active warps to sufficiently hide all latency.
+
+  The number of tile and block sizes depend on the program and graphic cards. We cannot set block size too big also not too small. But the number of threads per block must be a multiple of 32 which is the warp size. Also each SM unit on the GPU must have enough active warps to sufficiently hide all latency.
 
 
 * How does changing the number of planets change performance? Why?
-The more planets are there, the slower the program will run. Because to get the position, velocity and acceleration of each planet we will need to calculate the previous value and the delta value. All of them will based on the other planets. So the more planets we have in the program, the more complicated calculation it will be and it slows down the program.
+
+  The more planets are there, the slower the program will run. Because to get the position, velocity and acceleration of each planet we will need to calculate the previous value and the delta value. All of them will based on the other planets. So the more planets we have in the program, the more complicated calculation it will be and it slows down the program.
 
 
 
