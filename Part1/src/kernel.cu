@@ -83,25 +83,59 @@ __global__ void generateCircularVelArray(int time, int N, glm::vec3 * arr, glm::
     }
 }
 
+__device__ glm::vec3 calculateSingleAcceleration (glm::vec4 me, glm::vec4 other){
+	glm::vec3 outAcceleration (0,0,0);
+	
+	glm::vec4 distance4 = other-me;
+	glm::vec3 distance (distance4.x, distance4.y, distance4.z);
+	float length = glm::length (distance);
+
+	if (length > 0.1f){
+		outAcceleration = (float(G) * other.w / (length*length)) * (distance/length);
+	}
+	
+	return outAcceleration;
+}
+
 // TODO: Core force calc kernel global memory
 //		 HINT : You may want to write a helper function that will help you 
 //              calculate the acceleration contribution of a single body.
 //		 REMEMBER : F = (G * m_a * m_b) / (r_ab ^ 2)
 __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 {
-    return glm::vec3(0.0f);
+	glm::vec3 outAcc = calculateSingleAcceleration (my_pos, glm::vec4(0,0,0,starMass));
+	for (int i=0; i<N; i+=1){
+		outAcc += calculateSingleAcceleration (my_pos, their_pos[i]);
+	}
+    return outAcc;
 }
 
 // TODO : update the acceleration of each body
 __global__ void updateF(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
-	// FILL IN HERE
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+    
+	if (index < N){
+		glm::vec4 myPos;
+		glm::vec3 newAcceleration;
+
+		myPos = pos[index];
+		newAcceleration = accelerate(N, myPos, pos);
+		index[acc] = newAcceleration;
+	}
 }
 
 // TODO : update velocity and position using a simple Euler integration scheme
 __global__ void updateS(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
-	// FILL IN HERE
+	int id = (blockIdx.x * blockDim.x) + threadIdx.x;
+
+	if (id<N){
+		vel[id] += acc[id]*dt;
+		pos[id].x += vel[id].x * dt;
+        pos[id].y += vel[id].y * dt;
+        pos[id].z += vel[id].z * dt;
+	}
 }
 
 // Update the vertex buffer object
@@ -180,6 +214,16 @@ void initCuda(int N)
 void cudaNBodyUpdateWrapper(float dt)
 {
 	// FILL IN HERE
+	dim3 fullBlocksPerGrid((int)ceil(float(numObjects)/float(blockSize)));
+	
+	updateF<<<fullBlocksPerGrid, blockSize>>>(numObjects, dt, dev_pos, dev_vel, dev_acc);
+    checkCUDAErrorWithLine("Kernel failed!");
+
+	updateS<<<fullBlocksPerGrid, blockSize>>>(numObjects, dt, dev_pos, dev_vel, dev_acc);
+    checkCUDAErrorWithLine("Kernel failed!");
+
+	cudaThreadSynchronize ();
+
 }
 
 void cudaUpdateVBO(float * vbodptr, int width, int height)
