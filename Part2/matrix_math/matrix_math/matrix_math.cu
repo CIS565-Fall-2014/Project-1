@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 
-cudaError_t addWithCuda(const float *a, const float *b, float *c, unsigned int size);
+cudaError_t addWithCuda(const float *a, const float *b, float *c, float *d,float *e,unsigned int size);
 void serialMat_Mult(const float *a, const float *b, float *c, unsigned int width);
 void serialMat_Add(const float *a, const float *b, float *c, unsigned int width);
 void serialMat_Sub(const float *a, const float *b, float *c, unsigned int width);
@@ -28,7 +28,7 @@ int main()
 	serialMat_Sub(a, b, c_serialSub, 5);
 	serialMat_Mult(a, b, c_serialMul, 5);
     // Add vectors in parallel.
-    cudaError_t cudaStatus = addWithCuda(a, b, c_parallelAdd, arraySize);
+    cudaError_t cudaStatus = addWithCuda(a, b, c_parallelAdd, c_parallelSub, c_parallelMul, arraySize);
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "addWithCuda failed!");
         return 1;
@@ -71,6 +71,45 @@ int main()
 		   c_serialMul[10], c_serialMul[11], c_serialMul[12], c_serialMul[13], c_serialMul[14], 
 		   c_serialMul[15], c_serialMul[16], c_serialMul[17], c_serialMul[18], c_serialMul[19],
 		   c_serialMul[20], c_serialMul[21], c_serialMul[22], c_serialMul[23], c_serialMul[24]);
+
+	printf("-----------------------------------------------------------------\n");
+
+	printf("¡u 0,  1,  2,  3,  4¡U   ¡u 0,  1,  2,  3,  4¡U\n"
+		   "¡U 5,  6,  7,  8,  9¡U   ¡U 5,  6,  7,  8,  9¡U\n"
+	       "¡U10, 11, 12, 13, 14¡U + ¡U10, 11, 12, 13, 14¡U\n"
+	       "¡U15, 16, 17, 18, 19¡U   ¡U15, 16, 17, 18, 19¡U\n"
+	       "¡U20, 21, 22, 23, 24¡v   ¡U20, 21, 22, 23, 24¡v\n"
+		   "= \n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n", 
+		  c_parallelAdd[0],  c_parallelAdd[1],  c_parallelAdd[2],  c_parallelAdd[3],  c_parallelAdd[4], 
+		  c_parallelAdd[5],  c_parallelAdd[6],  c_parallelAdd[7],  c_parallelAdd[8],  c_parallelAdd[9],
+		  c_parallelAdd[10], c_parallelAdd[11], c_parallelAdd[12], c_parallelAdd[13], c_parallelAdd[14], 
+		  c_parallelAdd[15], c_parallelAdd[16], c_parallelAdd[17], c_parallelAdd[18], c_parallelAdd[19],
+		  c_parallelAdd[20], c_parallelAdd[21], c_parallelAdd[22], c_parallelAdd[23], c_parallelAdd[24]);
+
+	printf("¡u 0,  1,  2,  3,  4¡U   ¡u 0,  1,  2,  3,  4¡U\n"
+		   "¡U 5,  6,  7,  8,  9¡U   ¡U 5,  6,  7,  8,  9¡U\n"
+	       "¡U10, 11, 12, 13, 14¡U - ¡U10, 11, 12, 13, 14¡U\n"
+	       "¡U15, 16, 17, 18, 19¡U   ¡U15, 16, 17, 18, 19¡U\n"
+	       "¡U20, 21, 22, 23, 24¡v   ¡U20, 21, 22, 23, 24¡v\n"
+		   "= \n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n", 
+		   c_parallelSub[0],  c_parallelSub[1],  c_parallelSub[2],  c_parallelSub[3],  c_parallelSub[4], 
+		   c_parallelSub[5],  c_parallelSub[6],  c_parallelSub[7],  c_parallelSub[8],  c_parallelSub[9],
+		   c_parallelSub[10], c_parallelSub[11], c_parallelSub[12], c_parallelSub[13], c_parallelSub[14], 
+		   c_parallelSub[15], c_parallelSub[16], c_parallelSub[17], c_parallelSub[18], c_parallelSub[19],
+		   c_parallelSub[20], c_parallelSub[21], c_parallelSub[22], c_parallelSub[23], c_parallelSub[24]);
+
+	printf("¡u 0,  1,  2,  3,  4¡U   ¡u 0,  1,  2,  3,  4¡U\n"
+		   "¡U 5,  6,  7,  8,  9¡U   ¡U 5,  6,  7,  8,  9¡U\n"
+	       "¡U10, 11, 12, 13, 14¡U * ¡U10, 11, 12, 13, 14¡U\n"
+	       "¡U15, 16, 17, 18, 19¡U   ¡U15, 16, 17, 18, 19¡U\n"
+	       "¡U20, 21, 22, 23, 24¡v   ¡U20, 21, 22, 23, 24¡v\n"
+		   "= \n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n", 
+		   c_parallelMul[0],  c_parallelMul[1],  c_parallelMul[2],  c_parallelMul[3],  c_parallelMul[4], 
+		   c_parallelMul[5],  c_parallelMul[6],  c_parallelMul[7],  c_parallelMul[8],  c_parallelMul[9],
+		   c_parallelMul[10], c_parallelMul[11], c_parallelMul[12], c_parallelMul[13], c_parallelMul[14], 
+		   c_parallelMul[15], c_parallelMul[16], c_parallelMul[17], c_parallelMul[18], c_parallelMul[19],
+		   c_parallelMul[20], c_parallelMul[21], c_parallelMul[22], c_parallelMul[23], c_parallelMul[24]);
+
 
 	// cudaDeviceReset must be called before exiting in order for profiling and
     // tracing tools such as Nsight and Visual Profiler to show complete traces.
@@ -145,11 +184,13 @@ void serialMat_Mult(const float *a, const float *b, float *c, unsigned int width
 }
 
 // Helper function for using CUDA to add vectors in parallel.
-cudaError_t addWithCuda(const float *a, const float *b, float *c, unsigned int size)
+cudaError_t addWithCuda(const float *a, const float *b, float *c, float *d, float *e, unsigned int size)
 {
     float *dev_a = 0;
     float *dev_b = 0;
     float *dev_c = 0;
+	float *dev_d = 0;
+	float *dev_e = 0;
     cudaError_t cudaStatus;
 
     // Allocate GPU buffers for three vectors (two input, one output)    .
@@ -171,6 +212,18 @@ cudaError_t addWithCuda(const float *a, const float *b, float *c, unsigned int s
         goto Error;
     }
 
+	cudaStatus = cudaMalloc((void**)&dev_d, size * sizeof(float));
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "cudaMalloc failed!");
+        goto Error;
+    }
+
+	cudaStatus = cudaMalloc((void**)&dev_e, size * sizeof(float));
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "cudaMalloc failed!");
+        goto Error;
+    }
+
     // Copy input vectors from host memory to GPU buffers.
     cudaStatus = cudaMemcpy(dev_a, a, size * sizeof(float), cudaMemcpyHostToDevice);
     if (cudaStatus != cudaSuccess) {
@@ -186,7 +239,9 @@ cudaError_t addWithCuda(const float *a, const float *b, float *c, unsigned int s
 
     // Launch a kernel on the GPU with one thread for each element.
 	dim3 threadPerBlock(5, 5);
-    mat_mult <<<1, threadPerBlock>>>(dev_a, dev_b, dev_c, 5);
+    mat_add <<<1, threadPerBlock>>>(dev_a, dev_b, dev_c, 5);
+	mat_sub <<<1, threadPerBlock>>>(dev_a, dev_b, dev_d, 5);
+	mat_mult <<<1, threadPerBlock>>>(dev_a, dev_b, dev_e, 5);
 
     // Check for any errors launching the kernel
     cudaStatus = cudaGetLastError();
@@ -210,10 +265,25 @@ cudaError_t addWithCuda(const float *a, const float *b, float *c, unsigned int s
         goto Error;
     }
 
+	cudaStatus = cudaMemcpy(d, dev_d, size * sizeof(float), cudaMemcpyDeviceToHost);
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "cudaMemcpy failed!");
+        goto Error;
+    }
+
+	cudaStatus = cudaMemcpy(e, dev_e, size * sizeof(float), cudaMemcpyDeviceToHost);
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "cudaMemcpy failed!");
+        goto Error;
+    }
+
 Error:
-    cudaFree(dev_c);
+
     cudaFree(dev_a);
     cudaFree(dev_b);
+	cudaFree(dev_c);
+	cudaFree(dev_d);
+	cudaFree(dev_e);
     
     return cudaStatus;
 }
