@@ -55,7 +55,6 @@ __host__ __device__ glm::vec3 generateRandomNumberFromThread(float time, int ind
 //Also initialized the masses
 __global__ void generateRandomPosArray(int time, int N, glm::vec4 * arr, float scale, float mass)
 {
-	int a = 0;
     int index = (blockIdx.x * blockDim.x) + threadIdx.x;
     if(index < N)
     {
@@ -95,35 +94,63 @@ __global__ void computeAccelerate(float mass){
 //		 REMEMBER : F = (G * m_a * m_b) / (r_ab ^ 2)
 __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 {
+	//int index = threadIdx.x + (blockIdx.x * blockDim.x);
 
-
-	int index = threadIdx.x + (blockIdx.x * blockDim.x);
-
-
-	glm::vec3 dis = glm::vec3(their_pos[index].x - my_pos.x, their_pos[index].y - my_pos.y, their_pos[index].z - my_pos.z);
-	float length = glm::length(dis);
-	glm::vec3 unit = dis / length;
-
-
-	//glm::vec3 force =  G  * starMass /(length * length) * unit;
+	glm::vec3 acce = glm::vec3(0.0f);;
 
 
 
+	//for(int i = 0; i < N; ++i){
 
-    return glm::vec3(1.0f);
+	//	glm::vec3 dis = glm::vec3(their_pos[i].x - my_pos.x, their_pos[i].y - my_pos.y, their_pos[i].z - my_pos.z);
+	//	float length = glm::length(dis) + 0.1;
+	//	glm::vec3 unit = dis / length;
+
+	//	acce += (float)G * their_pos[i].w /(length * length) * unit ;
+
+	//}
+	//glm::vec3 dis = glm::vec3(0 - my_pos.x, 0 - my_pos.y, 0 - my_pos.z);
+	//float length = glm::length(dis) + 0.1;
+	//glm::vec3 unit = dis / length;
+	//acce += (float)G * starMass /(length * length) * unit ;
+
+	for(int i = 0; i < N; ++i){
+		float rx = their_pos[i].x - my_pos.x;
+		float ry = their_pos[i].y - my_pos.y;
+		float rz = their_pos[i].z - my_pos.z;
+		float disSqr = rx * rx + ry* ry + rz * rz;
+		float dis = sqrt(disSqr) + 0.1f;
+		float disCube = dis * dis * dis;
+		acce.x += (float)G * their_pos[i].w / disCube * rx;
+		acce.y += (float)G * their_pos[i].w / disCube * ry;
+		acce.z += (float)G * their_pos[i].w / disCube * rz;
+	}
+
+	float rx = -my_pos.x;
+	float ry = -my_pos.y;
+	float rz = -my_pos.z;
+	float disSqr = rx * rx + ry* ry + rz * rz;
+	float dis = sqrt(disSqr) + 0.1f;
+	float disCube = dis * dis * dis;
+	acce.x += (float)G * starMass / disCube * rx;
+	acce.y += (float)G * starMass / disCube * ry;
+	acce.z += (float)G * starMass / disCube * rz;
+
+
+    return acce;
 }
 
 // TODO : update the acceleration of each body
 __global__ void updateF(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
 	// FILL IN HERE
-	//glm::vec3 temp = glm::vec3(0,0,0);
 	int index = threadIdx.x + (blockIdx.x * blockDim.x);
 	if(index < N){
-		glm::vec3 temp = accelerate(N, pos[index], pos);
-		acc[index].x = temp.x;
-		acc[index].y = temp.y;
-		acc[index].z = temp.z;
+		glm::vec3 accValue = accelerate(N, pos[index], pos);
+
+		acc[index].x = accValue.x;
+		acc[index].y = accValue.y;
+		acc[index].z = accValue.z;
 	}
 	
 
@@ -223,22 +250,10 @@ void initCuda(int N)
 void cudaNBodyUpdateWrapper(float dt)
 {
 	// FILL IN HERE
-	//generateRandomPosArray  (int time, int N, glm::vec4 * arr, float scale, float mass)
-	//generateRandomPosArray<<<fullBlocksPerGrid, blockSize>>>(1, numObjects, dev_pos, scene_scale, planetMass);
+	dim3 fullBlocksPerGrid((int)ceil(float(numObjects)/float(blockSize)));
 
-	//generateCircularVelArray(int time, int N, glm::vec3 * arr, glm::vec4 * pos)
-	//generateCircularVelArray<<<fullBlocksPerGrid, blockSize>>>(2, numObjects, dev_vel, dev_pos);
-
-	//accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
-
-	//updateF(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
-	//updateF<<<fullBlocksPerGrid, blockSize, blockSize*sizeof(glm::vec4)>>>(numObjects, dt,  dev_pos, dev_vel, dev_acc);
-
-	//updateS(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
-	//updateF<<<fullBlocksPerGrid, blockSize, blockSize*sizeof(glm::vec4)>>>(numObjects, dt,  dev_pos, dev_vel, dev_acc);
-
-	//sendToPBO(int N, glm::vec4 * pos, float4 * pbo, int width, int height, float s_scale)
-	//sendToPBO<<<fullBlocksPerGrid, blockSize, blockSize*sizeof(glm::vec4)>>>(numObjects, dev_pos, pbodptr, width, height, scene_scale);
+	updateF<<<fullBlocksPerGrid, blockSize>>>(numObjects, dt,  dev_pos, dev_vel, dev_acc);
+	updateS<<<fullBlocksPerGrid, blockSize>>>(numObjects, dt,  dev_pos, dev_vel, dev_acc);
 	
 }
 
