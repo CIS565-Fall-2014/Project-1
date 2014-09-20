@@ -1,6 +1,30 @@
 #include <cuda_runtime.h>
 #include <stdio.h>
 
+void CPU_mat_sub(float* M, float* N, float* P, int width) {
+	for (int i = 0; i < width; i++) {
+		for (int j = 0; j < width; j++) {
+			P[i*width+j] = M[i*width+j] - N[i*width+j];
+		}
+	}
+}
+
+void CPU_mat_add(float* M, float* N, float* P, int width) {
+	for (int i = 0; i < width; i++) {
+		for (int j = 0; j < width; j++) {
+			P[i*width+j] = M[i*width+j] + N[i*width+j];
+		}
+	}
+}
+
+void CPU_mat_mult(float* M, float* N, float* P, int width) {
+	P = new float[25];
+	for (int i = 0; i < width; i++) {
+		for (int j = 0; j < width; j++) {
+			P[i*width+j] += M[i*width+j] * N[j*width+i];
+		}
+	}
+}
 
 __global__ void mat_sub_kernel(float* Md, float* Nd, float* Pd, int width) {
 	int tx = threadIdx.x;
@@ -152,7 +176,17 @@ int main () { //You need to fix linker issues so that your methods will be recog
 
 	mat_add(M,N,P,5);
 
-	printf("Matrix Add:\n");
+	printf("GPU Matrix Add:\n");
+	printf("%f ",P[0]); printf("%f ",P[1]); printf("%f ",P[2]); printf("%f ",P[3]); printf("%f ",P[4]); printf("\n");
+	printf("%f ",P[5]); printf("%f ",P[6]); printf("%f ",P[7]); printf("%f ",P[8]); printf("%f ",P[9]); printf("\n");
+	printf("%f ",P[10]); printf("%f ",P[11]); printf("%f ",P[12]); printf("%f ",P[13]); printf("%f ",P[14]); printf("\n");
+	printf("%f ",P[15]); printf("%f ",P[16]); printf("%f ",P[17]); printf("%f ",P[18]); printf("%f ",P[19]); printf("\n");
+	printf("%f ",P[20]); printf("%f ",P[21]); printf("%f ",P[22]); printf("%f ",P[23]); printf("%f ",P[24]); printf("\n");
+	printf("\n");
+
+	CPU_mat_add(M,N,P,5);
+
+	printf("CPU Matrix Add:\n");
 	printf("%f ",P[0]); printf("%f ",P[1]); printf("%f ",P[2]); printf("%f ",P[3]); printf("%f ",P[4]); printf("\n");
 	printf("%f ",P[5]); printf("%f ",P[6]); printf("%f ",P[7]); printf("%f ",P[8]); printf("%f ",P[9]); printf("\n");
 	printf("%f ",P[10]); printf("%f ",P[11]); printf("%f ",P[12]); printf("%f ",P[13]); printf("%f ",P[14]); printf("\n");
@@ -162,7 +196,17 @@ int main () { //You need to fix linker issues so that your methods will be recog
 
 	mat_sub(M,N,P,5);
 
-	printf("Matrix Subtract:\n");
+	printf("GPU Matrix Subtract:\n");
+	printf("%f ",P[0]); printf("%f ",P[1]); printf("%f ",P[2]); printf("%f ",P[3]); printf("%f ",P[4]); printf("\n");
+	printf("%f ",P[5]); printf("%f ",P[6]); printf("%f ",P[7]); printf("%f ",P[8]); printf("%f ",P[9]); printf("\n");
+	printf("%f ",P[10]); printf("%f ",P[11]); printf("%f ",P[12]); printf("%f ",P[13]); printf("%f ",P[14]); printf("\n");
+	printf("%f ",P[15]); printf("%f ",P[16]); printf("%f ",P[17]); printf("%f ",P[18]); printf("%f ",P[19]); printf("\n");
+	printf("%f ",P[20]); printf("%f ",P[21]); printf("%f ",P[22]); printf("%f ",P[23]); printf("%f ",P[24]); printf("\n");
+	printf("\n");
+
+	CPU_mat_sub(M,N,P,5);
+
+	printf("CPU Matrix Subtract:\n");
 	printf("%f ",P[0]); printf("%f ",P[1]); printf("%f ",P[2]); printf("%f ",P[3]); printf("%f ",P[4]); printf("\n");
 	printf("%f ",P[5]); printf("%f ",P[6]); printf("%f ",P[7]); printf("%f ",P[8]); printf("%f ",P[9]); printf("\n");
 	printf("%f ",P[10]); printf("%f ",P[11]); printf("%f ",P[12]); printf("%f ",P[13]); printf("%f ",P[14]); printf("\n");
@@ -172,7 +216,17 @@ int main () { //You need to fix linker issues so that your methods will be recog
 
 	mat_mult(M,N,P,5);
 
-	printf("Matrix Multiply:\n");
+	printf("GPU Matrix Multiply:\n");
+	printf("%f ",P[0]); printf("%f ",P[1]); printf("%f ",P[2]); printf("%f ",P[3]); printf("%f ",P[4]); printf("\n");
+	printf("%f ",P[5]); printf("%f ",P[6]); printf("%f ",P[7]); printf("%f ",P[8]); printf("%f ",P[9]); printf("\n");
+	printf("%f ",P[10]); printf("%f ",P[11]); printf("%f ",P[12]); printf("%f ",P[13]); printf("%f ",P[14]); printf("\n");
+	printf("%f ",P[15]); printf("%f ",P[16]); printf("%f ",P[17]); printf("%f ",P[18]); printf("%f ",P[19]); printf("\n");
+	printf("%f ",P[20]); printf("%f ",P[21]); printf("%f ",P[22]); printf("%f ",P[23]); printf("%f ",P[24]); printf("\n");
+	printf("\n");
+
+	CPU_mat_mult(M,N,P,5);
+
+	printf("CPU Matrix Multiply:\n");
 	printf("%f ",P[0]); printf("%f ",P[1]); printf("%f ",P[2]); printf("%f ",P[3]); printf("%f ",P[4]); printf("\n");
 	printf("%f ",P[5]); printf("%f ",P[6]); printf("%f ",P[7]); printf("%f ",P[8]); printf("%f ",P[9]); printf("\n");
 	printf("%f ",P[10]); printf("%f ",P[11]); printf("%f ",P[12]); printf("%f ",P[13]); printf("%f ",P[14]); printf("\n");
