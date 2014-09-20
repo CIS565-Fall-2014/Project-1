@@ -131,7 +131,7 @@ __global__ void updateF(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::
 	float s_scale = 2e2;
 	int index = threadIdx.x + (blockIdx.x * blockDim.x);
 
-	for (int i = 0; i < N; i++) {
+	for (int i = 0; i < N; i++) { //Maybe need nested for loop this way the "other" body becomes all but the current one
 		int x = i % width;
 		int y = i / width;
 		float w2 = width / 2.0;
@@ -151,7 +151,7 @@ __global__ void updateF(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::
 }
 
 // TODO : update velocity and position using a simple Euler integration scheme
-__global__ void updateS(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc) //DONE
+__global__ void updateS(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc) //Check if pos[3] is actually the mass of the body
 {
 	/*pos->x = pos->x + vel->x * dt;
 	pos->y = pos->y + vel->y * dt;
