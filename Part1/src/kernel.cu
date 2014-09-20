@@ -94,11 +94,7 @@ __global__ void computeAccelerate(float mass){
 //		 REMEMBER : F = (G * m_a * m_b) / (r_ab ^ 2)
 __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 {
-	//int index = threadIdx.x + (blockIdx.x * blockDim.x);
-
 	glm::vec3 acce = glm::vec3(0.0f);;
-
-
 
 	//for(int i = 0; i < N; ++i){
 
