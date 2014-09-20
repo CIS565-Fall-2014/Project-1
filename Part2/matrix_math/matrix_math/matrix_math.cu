@@ -4,10 +4,86 @@
 
 #include <stdio.h>
 
-cudaError_t addWithCuda(float *c, const float *a, const float *b, unsigned int size);
+cudaError_t addWithCuda(const float *a, const float *b, float *c, unsigned int size);
 void serialMat_Mult(const float *a, const float *b, float *c, unsigned int width);
 void serialMat_Add(const float *a, const float *b, float *c, unsigned int width);
 void serialMat_Sub(const float *a, const float *b, float *c, unsigned int width);
+
+
+
+int main()
+{
+    const int arraySize = 25;
+	const float a[arraySize] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24};
+	const float b[arraySize] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24};
+    float c_serialAdd[arraySize] = { 0 };
+	float c_serialSub[arraySize] = { 0 };
+	float c_serialMul[arraySize] = { 0 };
+	float c_parallelAdd[arraySize] = { 0 };
+	float c_parallelSub[arraySize] = { 0 };
+	float c_parallelMul[arraySize] = { 0 };
+
+
+	serialMat_Add(a, b, c_serialAdd, 5);
+	serialMat_Sub(a, b, c_serialSub, 5);
+	serialMat_Mult(a, b, c_serialMul, 5);
+    // Add vectors in parallel.
+    cudaError_t cudaStatus = addWithCuda(a, b, c_parallelAdd, arraySize);
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "addWithCuda failed!");
+        return 1;
+    }
+
+
+
+    printf("¡u 0,  1,  2,  3,  4¡U   ¡u 0,  1,  2,  3,  4¡U\n"
+		   "¡U 5,  6,  7,  8,  9¡U   ¡U 5,  6,  7,  8,  9¡U\n"
+	       "¡U10, 11, 12, 13, 14¡U + ¡U10, 11, 12, 13, 14¡U\n"
+	       "¡U15, 16, 17, 18, 19¡U   ¡U15, 16, 17, 18, 19¡U\n"
+	       "¡U20, 21, 22, 23, 24¡v   ¡U20, 21, 22, 23, 24¡v\n"
+		   "= \n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n", 
+		   c_serialAdd[0],  c_serialAdd[1],  c_serialAdd[2],  c_serialAdd[3],  c_serialAdd[4], 
+		   c_serialAdd[5],  c_serialAdd[6],  c_serialAdd[7],  c_serialAdd[8],  c_serialAdd[9],
+		   c_serialAdd[10], c_serialAdd[11], c_serialAdd[12], c_serialAdd[13], c_serialAdd[14], 
+		   c_serialAdd[15], c_serialAdd[16], c_serialAdd[17], c_serialAdd[18], c_serialAdd[19],
+		   c_serialAdd[20], c_serialAdd[21], c_serialAdd[22], c_serialAdd[23], c_serialAdd[24]);
+
+	printf("¡u 0,  1,  2,  3,  4¡U   ¡u 0,  1,  2,  3,  4¡U\n"
+		   "¡U 5,  6,  7,  8,  9¡U   ¡U 5,  6,  7,  8,  9¡U\n"
+	       "¡U10, 11, 12, 13, 14¡U - ¡U10, 11, 12, 13, 14¡U\n"
+	       "¡U15, 16, 17, 18, 19¡U   ¡U15, 16, 17, 18, 19¡U\n"
+	       "¡U20, 21, 22, 23, 24¡v   ¡U20, 21, 22, 23, 24¡v\n"
+		   "= \n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n", 
+		   c_serialSub[0],  c_serialSub[1],  c_serialSub[2],  c_serialSub[3],  c_serialSub[4], 
+		   c_serialSub[5],  c_serialSub[6],  c_serialSub[7],  c_serialSub[8],  c_serialSub[9],
+		   c_serialSub[10], c_serialSub[11], c_serialSub[12], c_serialSub[13], c_serialSub[14], 
+		   c_serialSub[15], c_serialSub[16], c_serialSub[17], c_serialSub[18], c_serialSub[19],
+		   c_serialSub[20], c_serialSub[21], c_serialSub[22], c_serialSub[23], c_serialSub[24]);
+
+	printf("¡u 0,  1,  2,  3,  4¡U   ¡u 0,  1,  2,  3,  4¡U\n"
+		   "¡U 5,  6,  7,  8,  9¡U   ¡U 5,  6,  7,  8,  9¡U\n"
+	       "¡U10, 11, 12, 13, 14¡U * ¡U10, 11, 12, 13, 14¡U\n"
+	       "¡U15, 16, 17, 18, 19¡U   ¡U15, 16, 17, 18, 19¡U\n"
+	       "¡U20, 21, 22, 23, 24¡v   ¡U20, 21, 22, 23, 24¡v\n"
+		   "= \n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n", 
+		   c_serialMul[0],  c_serialMul[1],  c_serialMul[2],  c_serialMul[3],  c_serialMul[4], 
+		   c_serialMul[5],  c_serialMul[6],  c_serialMul[7],  c_serialMul[8],  c_serialMul[9],
+		   c_serialMul[10], c_serialMul[11], c_serialMul[12], c_serialMul[13], c_serialMul[14], 
+		   c_serialMul[15], c_serialMul[16], c_serialMul[17], c_serialMul[18], c_serialMul[19],
+		   c_serialMul[20], c_serialMul[21], c_serialMul[22], c_serialMul[23], c_serialMul[24]);
+
+	// cudaDeviceReset must be called before exiting in order for profiling and
+    // tracing tools such as Nsight and Visual Profiler to show complete traces.
+    cudaStatus = cudaDeviceReset();
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "cudaDeviceReset failed!");
+        return 1;
+    }
+
+	int i;
+	scanf("%d", &i);
+    return 0;
+}
 
 __global__ void mat_add (const float *Md, const float *Nd, float *c, int width)
 {
@@ -31,90 +107,12 @@ __global__ void mat_mult (const float *Md, const float *Nd, float *c, int width)
 
 	float value = 0;
 	for(int k = 0; k < width; ++k){
-
 		float MdElement = Md[j * width + k];
 		float NdElement = Nd[k * width + i];
-
 		value +=  MdElement * NdElement;
-
 	}
 	c[j*width + i] = value;
 }
-
-int main()
-{
-    const int arraySize = 25;
-	const float a[arraySize] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24};
-	const float b[arraySize] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24};
-    float c[arraySize] = { 0 };
-	float d[arraySize] = { 0 };
-	float e[arraySize] = { 0 };
-
-   //const int arraySize = 5;
-   //const float a[arraySize][arraySize] = { {1, 2, 3, 4, 6},    {6, 1, 5, 3, 8},    {2, 6, 4, 9, 9},    {1, 3, 8, 3, 4},    {5, 7, 8, 2, 5} };
-   //const float b[arraySize][arraySize] = { {3, 5, 0, 8, 7},    {2, 2, 4, 8, 3},    {0, 2, 5, 1, 2},    {1, 4, 0, 5, 1},    {3, 4, 8, 2, 3} };
-   // float c[arraySize][arraySize] = { 0 };
-
-
-	serialMat_Add(a, b, c, 5);
-	serialMat_Sub(a, b, d, 5);
-	serialMat_Mult(a, b, e, 5);
-    // Add vectors in parallel.
-    //cudaError_t cudaStatus = addWithCuda(a, b, c, arraySize);
-    //if (cudaStatus != cudaSuccess) {
-    //    fprintf(stderr, "addWithCuda failed!");
-    //    return 1;
-    //}
-
-    printf("¡u 0,  1,  2,  3,  4¡U   ¡u 0,  1,  2,  3,  4¡U\n"
-		   "¡U 5,  6,  7,  8,  9¡U   ¡U 5,  6,  7,  8,  9¡U\n"
-	       "¡U10, 11, 12, 13, 14¡U + ¡U10, 11, 12, 13, 14¡U\n"
-	       "¡U15, 16, 17, 18, 19¡U   ¡U15, 16, 17, 18, 19¡U\n"
-	       "¡U20, 21, 22, 23, 24¡v   ¡U20, 21, 22, 23, 24¡v\n"
-		   "= \n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n", 
-		   c[0],  c[1],  c[2],  c[3],  c[4], 
-		   c[5],  c[6],  c[7],  c[8],  c[9],
-		   c[10], c[11], c[12], c[13], c[14], 
-		   c[15], c[16], c[17], c[18], c[19],
-		   c[20], c[21], c[22], c[23], c[24]);
-
-	printf("¡u 0,  1,  2,  3,  4¡U   ¡u 0,  1,  2,  3,  4¡U\n"
-		   "¡U 5,  6,  7,  8,  9¡U   ¡U 5,  6,  7,  8,  9¡U\n"
-	       "¡U10, 11, 12, 13, 14¡U - ¡U10, 11, 12, 13, 14¡U\n"
-	       "¡U15, 16, 17, 18, 19¡U   ¡U15, 16, 17, 18, 19¡U\n"
-	       "¡U20, 21, 22, 23, 24¡v   ¡U20, 21, 22, 23, 24¡v\n"
-		   "= \n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n", 
-		   d[0],  d[1],  d[2],  d[3],  d[4], 
-		   d[5],  d[6],  d[7],  d[8],  d[9],
-		   d[10], d[11], d[12], d[13], d[14], 
-		   d[15], d[16], d[17], d[18], d[19],
-		   d[20], d[21], d[22], d[23], d[24]);
-
-	printf("¡u 0,  1,  2,  3,  4¡U   ¡u 0,  1,  2,  3,  4¡U\n"
-		   "¡U 5,  6,  7,  8,  9¡U   ¡U 5,  6,  7,  8,  9¡U\n"
-	       "¡U10, 11, 12, 13, 14¡U * ¡U10, 11, 12, 13, 14¡U\n"
-	       "¡U15, 16, 17, 18, 19¡U   ¡U15, 16, 17, 18, 19¡U\n"
-	       "¡U20, 21, 22, 23, 24¡v   ¡U20, 21, 22, 23, 24¡v\n"
-		   "= \n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n{%.2f,%.2f,%.2f,%.2f,%.2f}\n", 
-		   e[0],  e[1],  e[2],  e[3],  e[4], 
-		   e[5],  e[6],  e[7],  e[8],  e[9],
-		   e[10], e[11], e[12], e[13], e[14], 
-		   e[15], e[16], e[17], e[18], e[19],
-		   e[20], e[21], e[22], e[23], e[24]);
-
-    // cudaDeviceReset must be called before exiting in order for profiling and
-    // tracing tools such as Nsight and Visual Profiler to show complete traces.
-    //cudaStatus = cudaDeviceReset();
-    //if (cudaStatus != cudaSuccess) {
-    //    fprintf(stderr, "cudaDeviceReset failed!");
-    //    return 1;
-    //}
-
-	int i;
-	scanf("%d", &i);
-    return 0;
-}
-
 
 void serialMat_Add(const float *a, const float *b, float *c, unsigned int width){
 	for(int i = 0; i < width; ++i){
@@ -153,8 +151,6 @@ cudaError_t addWithCuda(const float *a, const float *b, float *c, unsigned int s
     float *dev_b = 0;
     float *dev_c = 0;
     cudaError_t cudaStatus;
-
-	//size = 25;
 
     // Allocate GPU buffers for three vectors (two input, one output)    .
     cudaStatus = cudaMalloc((void**)&dev_a, size * sizeof(float));
