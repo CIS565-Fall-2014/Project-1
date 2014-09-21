@@ -37,7 +37,7 @@ simple matrix math functions. Please put this portion in a folder marked Part2
 in your repository. 
 
 ### Step 1 : Create your project.
-Using the instructions on the Google forum, please set up a new Visual Studio project that
+Using the instructions on the Google forum *(in the __earliest__ post)*, please set up a new Visual Studio project that
 compiles using CUDA. For uniformity, please write your main function and all
 your code in a file named matrix_math.cu.
 
