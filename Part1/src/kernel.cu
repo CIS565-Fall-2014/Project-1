@@ -89,22 +89,28 @@ __global__ void generateCircularVelArray(int time, int N, glm::vec3 * arr, glm::
 //		 HINT : You may want to write a helper function that will help you 
 //              calculate the acceleration contribution of a single body.
 //		 REMEMBER : F = (G * m_a * m_b) / (r_ab ^ 2)
-__device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
-{	
-	glm::vec3 acc(0,0,0);
+__device__ glm::vec3 TwoAcc(glm::vec4 my_pos, glm::vec4 their_pos)
+{
+	glm::vec3 tempacc(0,0,0);
+	glm::vec3 dist = glm::vec3(their_pos.x - my_pos.x ,their_pos.y - my_pos.y,their_pos.z - my_pos.z);
+	float mag = dist.x*dist.x + dist.y*dist.y + dist.z*dist.z;
 
-	for(int index=0;index<N;index++)
+	if(mag > 0.01f)
 	{
-		glm::vec3 tempacc(0,0,0);
-		glm::vec3 dist = glm::vec3(their_pos[index].x - my_pos.x ,their_pos[index].y - my_pos.y,their_pos[index].z - my_pos.z);
-	    float mag = dist.x*dist.x + dist.y*dist.y + dist.z*dist.z;
-		if(mag > 0.001f)
-	    {
-	        float forcef = (G * their_pos[index].w)/mag;
-		    tempacc = glm::normalize(dist) * forcef;
-	    	acc = acc + tempacc;
-		}
+		float forcef = (G * their_pos.w)/mag;
+	    tempacc = glm::normalize(dist) * forcef;
 	}
+    
+	return tempacc;
+}
+
+
+__device__ glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
+{	
+	glm::vec3 acc = TwoAcc(my_pos,glm::vec4(0,0,0,starMass));
+    for(int i=0;i<N;i++)
+		acc += TwoAcc(my_pos,their_pos[i]);
+
 	return acc;
 }
 
@@ -113,10 +119,9 @@ __global__ void updateF(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::
 {
 	// FILL IN HERE
 	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
-
 	if(index<N)
 	{
-	    glm::vec4 my_pos = pos[index];
+	    glm::vec4 my_pos = pos[index];	
 		glm::vec3 newacc = accelerate(N,my_pos,pos);
 		acc[index] = newacc;
 	}
@@ -170,13 +175,13 @@ __global__ void sendToPBO(int N, glm::vec4 * pos, float4 * pbo, int width, int h
     float c_scale_h = height / s_scale;
 
     glm::vec3 color(0.05, 0.15, 0.3);
-    glm::vec3 acc = accelerate(N, glm::vec4((x-w2)/c_scale_w,(y-h2)/c_scale_h,0,1), pos);
-
+    //glm::vec3 acc = TwoAcc(glm::vec4((x-w2)/c_scale_w,(y-h2)/c_scale_h,0,1), pos[index]);
+	glm::vec3 acc = glm::vec3(0,0,0);
     if(x<width && y<height)
     {
         float mag = sqrt(sqrt(acc.x*acc.x + acc.y*acc.y + acc.z*acc.z));
         
-		// Each thread writes one pixel location in the texture (textel)
+		//Each thread writes one pixel location in the texture (textel)
         pbo[index].w = (mag < 1.0f) ? mag : 1.0f;
     }
 }
