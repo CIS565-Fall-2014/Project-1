@@ -83,25 +83,67 @@ __global__ void generateCircularVelArray(int time, int N, glm::vec3 * arr, glm::
     }
 }
 
-// TODO: Core force calc kernel global memory
+// TOD-O-DONE: Core force calc kernel global memory
 //		 HINT : You may want to write a helper function that will help you 
 //              calculate the acceleration contribution of a single body.
 //		 REMEMBER : F = (G * m_a * m_b) / (r_ab ^ 2)
 __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 {
-    return glm::vec3(0.0f);
+	// I need to return a vector of magnitude F and direction their_pos - my_pos
+	// (adding onto my_pos should take me to their_pos)
+
+	// **UNFORTUNATELY, this function doesn't seem quite parallel enough to avoid using a for loop below...
+	// What I want to do is calculate all the acc contributions in parallel, then add them all (in parallel)?
+	// I have no clue how to do that, so for now the implementation is a for loop.
+
+	float planetMass = 3e8; // WHY AM I DOING THIS??
+
+	glm::vec3 result; // this function has to return something
+
+
+
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x; // I don't know what this is, but it looks important. Seems like an index for the their_pos array
+	//if (index < N) // I actually have no idea what this is at all
+	//{
+	glm::vec4 r_vector_4;
+	glm::vec3 r_vector;
+	float F;
+
+	for (int i = 0; i < N; i++) {
+		if (i == index) continue; // don't need div-by-0 errors, I think... I wrote this line pre-emptively, so I don't really know if I actually need it
+		r_vector_4 = their_pos[i] - my_pos;
+		r_vector = glm::vec3(r_vector_4);
+
+		F = G * planetMass * planetMass / pow(glm::length(r_vector), 2);
+		result += F * glm::normalize(r_vector);
+	}
+	//}
+
+	// so does "generateCircularVelArray" take care of the star? It looks like it modifies the dev_vel array...
+	// if so then I don't need to do anything special here
+
+	return result;
 }
 
-// TODO : update the acceleration of each body
+// TOD-O-DONE : update the acceleration of each body
 __global__ void updateF(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
-	// FILL IN HERE
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x; // ? looks important, some sort of parallel-indexing thing
+	if (index < N) // ?????????? why
+	{
+		acc[index] = accelerate(N, pos[index], pos);
+	}
 }
 
-// TODO : update velocity and position using a simple Euler integration scheme
+// TOD-O-DONE : update velocity and position using a simple Euler integration scheme
 __global__ void updateS(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
-	// FILL IN HERE
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x; // ? looks important, some sort of parallel-indexing thing
+	if (index < N) // ?????????? why
+	{
+		vel[index] += acc[index] * dt; //CHANGE in velocity is acceleration * time. Assume acc is constant for all of dt
+		pos[index] += glm::vec4(vel[index] * dt, 0); //CHANGE in position is velocity * time, etc
+	}
 }
 
 // Update the vertex buffer object
@@ -179,7 +221,10 @@ void initCuda(int N)
 // TODO : Using the functions you wrote above, write a function that calls the CUDA kernels to update a single sim step
 void cudaNBodyUpdateWrapper(float dt)
 {
-	// FILL IN HERE
+	dim3 fullBlocksPerGrid((int)ceil(float(numObjects)/float(blockSize))); // copying this from below, like the "int index" for the other stuff.
+	updateF<<<fullBlocksPerGrid, blockSize>>>(numObjects, dt, dev_pos, dev_vel, dev_acc); // eh, looks about right
+	updateS<<<fullBlocksPerGrid, blockSize>>>(numObjects, dt, dev_pos, dev_vel, dev_acc);
+
 }
 
 void cudaUpdateVBO(float * vbodptr, int width, int height)
