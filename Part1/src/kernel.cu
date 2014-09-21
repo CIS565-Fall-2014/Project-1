@@ -126,7 +126,6 @@ __global__ void updateF(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::
 			share[tx] = pos[m * blockSize + tx];
 			__syncthreads();
 
-
 			if(m == div-1)
 				accValue += accelerate(N % blockSize, pos[index], share);
 			else
