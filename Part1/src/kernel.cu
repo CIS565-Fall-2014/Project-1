@@ -83,25 +83,67 @@ __global__ void generateCircularVelArray(int time, int N, glm::vec3 * arr, glm::
     }
 }
 
+
+
+//I ADDED THIS FUNCTION AS A HELPER
+//REMEMBER : F = (G * m_a * m_b) / (r_ab ^ 2)
+__device__ glm::vec3 accelerateHelper(glm::vec4 p1, glm::vec4 p2) 
+{
+	glm::vec3 r = glm::vec3(p2.x - p1.x, p2.y - p1.y, p2.z - p1.z);
+	float r_ab1 = pow(r.x,2.f) + pow(r.y,2.f) + pow(r.z,2.f) + 0.000001;
+	float r_ab2 = 1/sqrt(r_ab1*r_ab1*r_ab1);
+	float f = p2.w * r_ab2;
+	if (sqrt(pow(r.x,2.f) + pow(r.y,2.f) + pow(r.z,2.f)) >= 1) {
+		f *= G;
+	}
+	return r*f;
+}
+
 // TODO: Core force calc kernel global memory
 //		 HINT : You may want to write a helper function that will help you 
 //              calculate the acceleration contribution of a single body.
 //		 REMEMBER : F = (G * m_a * m_b) / (r_ab ^ 2)
 __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 {
-    return glm::vec3(0.0f);
+	glm::vec3 a = glm::vec3(0,0,0);
+	glm::vec3 temp = glm::vec3(0,0,0);
+	for (int i = 0; i < N; i++) {
+		if (my_pos != their_pos[i]) {
+			a += accelerateHelper(my_pos, their_pos[i]);
+		}
+	}
+	glm::vec4 starPos = glm::vec4(0,0,0,starMass);
+	a += accelerateHelper(my_pos, starPos);
+    return a;
 }
 
 // TODO : update the acceleration of each body
 __global__ void updateF(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
 	// FILL IN HERE
+
+	for (int i = 0; i < N; i++) {
+		glm::vec3 a = accelerate(N, pos[i], pos);
+		acc[i].x = a.x;
+		acc[i].y = a.y;
+		acc[i].z = a.z;
+	}
+
 }
 
 // TODO : update velocity and position using a simple Euler integration scheme
-__global__ void updateS(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
+__global__ void updateS(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc) //DONE
 {
-	// FILL IN HERE
+	for (int i = 0; i < N; i++) {
+				 
+		vel[i].x += acc[i].x * dt;
+		vel[i].y += acc[i].y * dt;
+		vel[i].z += acc[i].z * dt;
+
+		pos[i].x += vel[i].x * dt;
+		pos[i].y += vel[i].y * dt;
+		pos[i].z += vel[i].z * dt;
+	}
 }
 
 // Update the vertex buffer object
@@ -179,7 +221,9 @@ void initCuda(int N)
 // TODO : Using the functions you wrote above, write a function that calls the CUDA kernels to update a single sim step
 void cudaNBodyUpdateWrapper(float dt)
 {
-	// FILL IN HERE
+	dim3 fullBlocksPerGrid((int)ceil(float(numObjects)/float(blockSize)));
+	updateF<<<fullBlocksPerGrid, blockSize>>>(numObjects, dt, dev_pos, dev_vel, dev_acc);
+	updateS<<<fullBlocksPerGrid, blockSize>>>(numObjects, dt, dev_pos, dev_vel, dev_acc);
 }
 
 void cudaUpdateVBO(float * vbodptr, int width, int height)
