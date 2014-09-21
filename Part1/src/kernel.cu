@@ -114,7 +114,7 @@ __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 	//calculate the accelaration to center star at first
 	glm::vec3 returnAcc = accelerateone(my_pos, glm::vec4(0,0,0,starMass)) ;
 	
-	for(int index=1; index<N; index++){
+	for(int index=0; index<N; index++){
 		
 			returnAcc += accelerateone(my_pos,their_pos[index]);
 	
