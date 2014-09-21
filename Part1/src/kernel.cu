@@ -101,11 +101,12 @@ __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 		{
 			r = glm::vec3(their_pos[i].x-my_pos.x, their_pos[i].y-my_pos.y, their_pos[i].z-my_pos.z);
 			float l = glm::length(r);
-			acc +=  (float)( (float)their_pos[i].w / powf(l * l + EPSILON * EPSILON,3/2)) * r;
+			glm::vec3 mag = r / l;
+			acc +=  (float)( (float)their_pos[i].w / powf(l * l + ZERO_ABSORPTION_EPSILON * ZERO_ABSORPTION_EPSILON,3/2)) * mag;
 			//acc +=  r * (float) (their_pos[i].w / (l* l * l + EPSILON)) ;
 		}
 	}
-	acc += (float)(  (float)starMass / powf(l * l + EPSILON * EPSILON,3/2)) * (-pos); 
+	acc += (float)(  (float)starMass / powf(l * l + ZERO_ABSORPTION_EPSILON * ZERO_ABSORPTION_EPSILON,3/2)) * (-pos)/glm::length(-pos); 
 	//acc +=  (-pos) * (float)(starMass / ( s * s * s + EPSILON )) ; 
     return (float)G * acc;
 }
