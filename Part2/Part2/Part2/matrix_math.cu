@@ -1,6 +1,5 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
-#include "matrix_math.h"
 
 #include <stdio.h>
 #include <iostream>
