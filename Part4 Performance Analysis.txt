@@ -1,6 +1,6 @@
 Part 4:
 
-NOTE: In Part 1 I decreased the number of nbodies to 7000 because the original number given (5000) crashed my graphics card.
+NOTE: In Part 1 I decreased the number of nbodies to 700 because the original number given (5000) crashed my graphics card.
 
 1) How does changing the tile and block sizes change performance? Why?
 Increasing the number of tile/block sizes would improve performance/decrease performance time, because the more blocks there are, the more threads there are available to work on planet acceleration, velocity, and position calculations. Since threads can perform calculations concurrently, the more threads there are the more planet calculations we can perform at the same time. Having more planet calculations completed at the same time means that it will take less time to calculate the new planet positions at each time step, making the simulation run faster. Also, in the case where all threads from one block are in use, thereby stalling that block from completing new calculations, another block can continue calculations until it stalls, and this cycle would continue until you run out of blocks. However if you have enough blocks, then when the final block stalls, the first block will have completed its calculations and be able to undertake more calculations, allowing for quicker time steps.
