@@ -158,14 +158,14 @@ void MatrixOnHost(float *M, float *N, float *P, int width, int operation)
 	case MATRIX_ADD:
 		 for( int i = 0; i< width; i++){
 			 for(int j=0; j<width; j++){
-				 P[i*width+j] = N[i*width+j] + N[i*width+j];
+				 P[i*width+j] = M[i*width+j] + N[i*width+j];
 			 }
 		 }
 		break;
 	case MATRIX_SUB:
 		 for( int i = 0; i< width; i++){
 			 for(int j=0; j<width; j++){
-				 P[i*width+j] = N[i*width+j] - N[i*width+j];
+				 P[i*width+j] = M[i*width+j] - N[i*width+j];
 			 }
 		 }
 		break;
@@ -185,12 +185,28 @@ void MatrixOnHost(float *M, float *N, float *P, int width, int operation)
 
 int main(int argc, char** argv)
 {
-	float * entry;   //pointer to the entry
+	//initialize the entry matrix
+	float * entry, * entry1, * entry2, *entry3;  
 	entry = new float[Width*Width];
+	entry1 = new float[Width*Width];
+	entry2 = new float[Width*Width];
+	entry3 = new float[Width*Width];
 	for(int k=0; k<Width*Width; k++){
 		entry[k] = k;
 		//std::cout<<k<<std::endl;
 	}
+
+	entry1[0]=2; entry1[1]=1; entry1[2]=2; entry1[3]=1; entry1[4]=2; 
+	entry1[5]=4; entry1[6]=6; entry1[7]=1; entry1[8]=7; entry1[9]=1; 
+	entry1[10]=3; entry1[11]=3; entry1[12]=11; entry1[13]=2; entry1[14]=11; 
+	entry1[15]=18; entry1[16]=10; entry1[17]=9; entry1[18]=8; entry1[19]=12; 
+	entry1[20]=8; entry1[21]=5; entry1[22]=3; entry1[23]=14; entry1[24]=20; 
+
+	entry2[0]=5; entry2[1]=10; entry2[2]=20; entry2[3]=11; entry2[4]=2; 
+	entry2[5]=14; entry2[6]=3; entry2[7]=12; entry2[8]=17; entry2[9]=7; 
+	entry2[10]=2; entry2[11]=7; entry2[12]=10; entry2[13]=5; entry2[14]=6; 
+	entry2[15]=20; entry2[16]=3; entry2[17]=8; entry2[18]=13; entry2[19]=4; 
+	entry2[20]=18; entry2[21]=15; entry2[22]=9; entry2[23]=8; entry2[24]=2; 
 	/*std::cout<<"************Initial: ************"<<std::endl;
 	for(int i=0; i<Width; i++){
 		std::stringstream ss;
