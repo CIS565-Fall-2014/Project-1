@@ -3,16 +3,30 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CIS565_PROJ_1", "cIS565_PROJ_1\CIS565_PROJ_1.vcxproj", "{D7BEFF7A-4902-4B7E-922B-B0417A66864C}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Matrix", "Matrix\Matrix.vcxproj", "{06DD2D05-C897-4C31-9923-61D1BB0CCD6B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
 		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{D7BEFF7A-4902-4B7E-922B-B0417A66864C}.Debug|Win32.ActiveCfg = Debug|Win32
 		{D7BEFF7A-4902-4B7E-922B-B0417A66864C}.Debug|Win32.Build.0 = Debug|Win32
+		{D7BEFF7A-4902-4B7E-922B-B0417A66864C}.Debug|x64.ActiveCfg = Debug|Win32
 		{D7BEFF7A-4902-4B7E-922B-B0417A66864C}.Release|Win32.ActiveCfg = Release|Win32
 		{D7BEFF7A-4902-4B7E-922B-B0417A66864C}.Release|Win32.Build.0 = Release|Win32
+		{D7BEFF7A-4902-4B7E-922B-B0417A66864C}.Release|x64.ActiveCfg = Release|Win32
+		{06DD2D05-C897-4C31-9923-61D1BB0CCD6B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{06DD2D05-C897-4C31-9923-61D1BB0CCD6B}.Debug|Win32.Build.0 = Debug|Win32
+		{06DD2D05-C897-4C31-9923-61D1BB0CCD6B}.Debug|x64.ActiveCfg = Debug|x64
+		{06DD2D05-C897-4C31-9923-61D1BB0CCD6B}.Debug|x64.Build.0 = Debug|x64
+		{06DD2D05-C897-4C31-9923-61D1BB0CCD6B}.Release|Win32.ActiveCfg = Release|Win32
+		{06DD2D05-C897-4C31-9923-61D1BB0CCD6B}.Release|Win32.Build.0 = Release|Win32
+		{06DD2D05-C897-4C31-9923-61D1BB0CCD6B}.Release|x64.ActiveCfg = Release|x64
+		{06DD2D05-C897-4C31-9923-61D1BB0CCD6B}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

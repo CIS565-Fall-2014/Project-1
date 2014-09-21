@@ -9,7 +9,7 @@
 dim3 threadsPerBlock(blockSize);
 
 int numObjects;
-const float planetMass = 3e8;
+const __device__ float planetMass = 3e8;
 const __device__ float starMass = 5e10;
 
 const float scene_scale = 2e2; //size of the height map in simulation space
@@ -95,13 +95,48 @@ __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 // TODO : update the acceleration of each body
 __global__ void updateF(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
-	// FILL IN HERE
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+	
+    if(index < N)
+    {
+
+		float len = (starMass * G)/(pos[index].x*pos[index].x+pos[index].y*pos[index].y+pos[index].z*pos[index].z);
+		glm::vec4 dir = -pos[index];
+		dir = glm::normalize(dir) * len;
+        acc[index].x = dir.x;
+        acc[index].y = dir.y;
+        acc[index].z = dir.z;
+
+		for(int i=0;i<N;i++)
+		{
+			if(i!=index){
+			
+				len = glm::length(pos[i] - pos[index]);
+				dir = (pos[i] - pos[index]);
+				len = (planetMass * G)/(len * len* len);
+				dir = dir * len;
+				acc[index].x += dir.x;
+				acc[index].y += dir.y;
+				acc[index].z += dir.z;
+			}
+		}
+    }
 }
 
 // TODO : update velocity and position using a simple Euler integration scheme
 __global__ void updateS(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
-	// FILL IN HERE
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+    if(index < N)
+    {
+        vel[index].x += acc[index].x*dt;
+        vel[index].y += acc[index].y*dt;
+        vel[index].z += acc[index].z*dt;
+
+		pos[index].x += vel[index].x*dt;
+        pos[index].y += vel[index].y*dt;
+        pos[index].z += vel[index].z*dt;
+    }
 }
 
 // Update the vertex buffer object
@@ -152,12 +187,14 @@ __global__ void sendToPBO(int N, glm::vec4 * pos, float4 * pbo, int width, int h
  * Wrappers for the __global__ calls *
  *************************************/
 
+
+
 //Initialize memory, update some globals
 void initCuda(int N)
 {
     numObjects = N;
-    dim3 fullBlocksPerGrid((int)ceil(float(N)/float(blockSize)));
-
+    
+	dim3 fullBlocksPerGrid((int)ceil(float(N)/float(blockSize)));
     cudaMalloc((void**)&dev_pos, N*sizeof(glm::vec4));
     checkCUDAErrorWithLine("Kernel failed!");
     
@@ -179,7 +216,10 @@ void initCuda(int N)
 // TODO : Using the functions you wrote above, write a function that calls the CUDA kernels to update a single sim step
 void cudaNBodyUpdateWrapper(float dt)
 {
-	// FILL IN HERE
+	dim3 fullBlocksPerGrid((int)ceil(float(numObjects)/float(blockSize)));
+	updateF<<<fullBlocksPerGrid, blockSize>>>(numObjects,dt,dev_pos,dev_vel,dev_acc);
+	updateS<<<fullBlocksPerGrid, blockSize>>>(numObjects,dt,dev_pos,dev_vel,dev_acc);
+	cudaThreadSynchronize();
 }
 
 void cudaUpdateVBO(float * vbodptr, int width, int height)
