@@ -4,7 +4,7 @@
 
 #include "main.h"
 
-#define N_FOR_VIS 5000
+#define N_FOR_VIS 2000
 #define DT 0.2
 #define VISUALIZE 1
 //-------------------------------
@@ -16,6 +16,7 @@ int main(int argc, char** argv)
     // Launch CUDA/GL
 
     init(argc, argv);
+	
 
     cudaGLSetGLDevice(0);
     initPBO(&pbo);

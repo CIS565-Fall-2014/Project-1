@@ -1,7 +1,22 @@
-Project 1
+Project 1: Introduction to CUDA
 =========
 
-# Project 1 : Introduction to CUDA
+# Answer to Qs
+
+
+How does changing the tile and block sizes change performance? Why?
+If the tile size becomes bigger, the access to global memory becomes less, hence faster the performance;
+If the block size becomes bigger, there will be more threads that can be executed parallel, hence faster the performance.
+
+
+How does changing the number of planets change performance? Why?
+Number of planets is reversely related to the performance, that is, the less the planet, the faster the performance. 
+It is because we have "N" iterations for each body, and time cost will reduce if "N" reduces.
+
+Without running experiments, how would you expect the serial and GPU verions of matrix_math to compare? Why?
+Serial version should be slower than parallel verion. 
+Because we don't have to wait to iterate through 5x5 entries in the matrix, instead, we do it parallelly, and simutaneously. 
+
 
 ## NOTE :
 This project (and all other projects in this course) requires a NVIDIA graphics
@@ -118,3 +133,5 @@ describe the changes you make between experiments and how you are benchmarking.
 Please commit your changes to your forked version of the repository and open a
 pull request.  Please write your performance analysis in your README.md.
 Remember to email Harmony (harmoli+CIS565@seas.upenn.edu) your grade and why.
+
+
