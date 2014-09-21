@@ -1,4 +1,5 @@
 Performance Analysis:
+
 I used: N = 1000, blockSize = 128, without share memory, fps: 9.3 to be my benchmark. 
 I found that the blockSize under 128 will decrease the performance dramatically.
 With the same N, when I set the blockSize to 64, the fps will be 6.7. 
