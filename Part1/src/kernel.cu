@@ -9,7 +9,7 @@
 dim3 threadsPerBlock(blockSize);
 
 int numObjects;
-const float planetMass = 3e8;
+const __device__ float planetMass = 3e8;
 const __device__ float starMass = 5e10;
 
 const float scene_scale = 2e2; //size of the height map in simulation space
@@ -89,19 +89,28 @@ __global__ void generateCircularVelArray(int time, int N, glm::vec3 * arr, glm::
 //		 REMEMBER : F = (G * m_a * m_b) / (r_ab ^ 2)
 __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 {
-    return glm::vec3(0.0f);
+	glm::vec3 force(0.0f);
+	for (int i = 0; i < N; i++) {
+		force +=  glm::vec3(their_pos[i] - my_pos) *
+			(float) (G * planetMass * planetMass / pow(glm::length(my_pos - their_pos[i]), 2));
+	}
+    return force;
 }
 
 // TODO : update the acceleration of each body
 __global__ void updateF(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
-	// FILL IN HERE
+	for (int i = 0; i < N; i++) {
+		*acc = accelerate(N, pos[i], pos);
+	}
 }
 
 // TODO : update velocity and position using a simple Euler integration scheme
 __global__ void updateS(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
-	// FILL IN HERE
+	for (int i = 0; i < N; i++) {
+		*pos = glm::vec4(*pos + dt * glm::vec4(*vel, 0));
+	}
 }
 
 // Update the vertex buffer object
