@@ -7,9 +7,20 @@ Project 1
 Part 4
 ------
 
+### N-body performance analysis
 
+* How does changing the tile and block sizes change performance? Why?
 
-*Expected matrix_math GPU/CPU comparison*
+* How does changing the number of planets change performance? Why?
+
+![N-Body performance by block size (using minimum necessary block count)](perftests.png)
+
+TODO
+
+### Performance predictions: matrix_math
+
+* Without running experiments, how would you expect the serial and GPU verions
+of matrix_math to compare? Why?
 
 For matrix addition and subtraction, I don't expect much
 of a performance increase, if any, using the GPU. Since these operations are
