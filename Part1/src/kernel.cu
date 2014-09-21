@@ -9,7 +9,7 @@
 dim3 threadsPerBlock(blockSize);
 
 int numObjects;
-const float planetMass = 3e8;
+const __device__ float planetMass = 3e8; // added __device__ here and it fixed my problem without causing any new ones
 const __device__ float starMass = 5e10;
 
 const float scene_scale = 2e2; //size of the height map in simulation space
@@ -89,6 +89,19 @@ __global__ void generateCircularVelArray(int time, int N, glm::vec3 * arr, glm::
 //		 REMEMBER : F = (G * m_a * m_b) / (r_ab ^ 2)
 __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 {
+
+	//****************************************************************************************************************
+	// You'll notice that I added a factor to decrease F. I did this because without such a factor, I
+	// couldn't find anything wrong with my implementation after staring at the equation for F for like an hour,
+	// but the numbers being returned were way too big (like, |F| = 30 provides fast movement, and through indirect
+	// means I was able to determine that the actual values being returned are in the 1000s). So yeah that's why
+	// that's there.
+	//****************************************************************************************************************
+
+
+
+
+
 	// I need to return a vector of magnitude F and direction their_pos - my_pos
 	// (adding onto my_pos should take me to their_pos)
 
@@ -96,7 +109,7 @@ __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 	// What I want to do is calculate all the acc contributions in parallel, then add them all (in parallel)?
 	// I have no clue how to do that, so for now the implementation is a for loop.
 
-	float planetMass = 3e8; // WHY AM I DOING THIS??
+	//float planetMass = 3e8; // WHY AM I DOING THIS??
 
 	glm::vec3 result; // this function has to return something
 
@@ -109,20 +122,39 @@ __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 	glm::vec3 r_vector;
 	float F;
 
+	float factor = 5e7;
+
 	for (int i = 0; i < N; i++) {
-		if (i == index) continue; // don't need div-by-0 errors, I think... I wrote this line pre-emptively, so I don't really know if I actually need it
+		if (i == index) continue; // don't want div-by-0 errors, I think... I wrote this line pre-emptively, so I don't really know if I actually need it
 		r_vector_4 = their_pos[i] - my_pos;
 		r_vector = glm::vec3(r_vector_4);
 
-		F = G * planetMass * planetMass / pow(glm::length(r_vector), 2);
-		result += F * glm::normalize(r_vector);
+		F = G * planetMass * planetMass / pow(glm::length(r_vector)*factor, 2);
+		result += F * glm::normalize(r_vector)*factor;
 	}
+
+
+
 	//}
 
 	// so does "generateCircularVelArray" take care of the star? It looks like it modifies the dev_vel array...
 	// if so then I don't need to do anything special here
+	// NO, I AM WRONG, that function makes things go in circles upon initiation of the scene (otherwise it wouldn't look like a solar system).
+	// Thus I DO need to take into account the gravitational pull of the sun:
+	
+	r_vector = -1.f * glm::vec3(my_pos); // star is at (0,0,0)
+	
+	//the way I've used "factor" below does exactly the same thing as the corresponding lines above
+	F = G * planetMass * starMass / pow(glm::length(r_vector), 2);
+	result += F * glm::normalize(r_vector)/factor;
+
+
+
+
+	//result += 35.f * glm::normalize(r_vector);
 
 	return result;
+	//return glm::vec3(0.0f, 0.0f, 0.0f);
 }
 
 // TOD-O-DONE : update the acceleration of each body
