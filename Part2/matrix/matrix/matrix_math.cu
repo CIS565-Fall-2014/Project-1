@@ -1,9 +1,10 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <iostream>
+#include <math.h>
 
 using namespace std;
-const int N = 3;
+const int N = 5;
 
 //data on device
 float * dev_matA;
@@ -34,22 +35,22 @@ void printRes()
 
 __global__ void mat_add(float * A, float * B, float * res)
 {
-	int x = threadIdx.x;
-	int y = threadIdx.y;
+	int x = threadIdx.x + blockIdx.x *blockDim.x;
+	int y = threadIdx.y + blockIdx.y *blockDim.y;
 	res[x + y*N] = A[x + y*N] + B[x + y*N];
 }
 
 __global__ void mat_sub(float * A, float * B, float * res)
 {
-	int x = threadIdx.x;
-	int y = threadIdx.y;
+	int x = threadIdx.x + blockIdx.x *blockDim.x;
+	int y = threadIdx.y + blockIdx.y *blockDim.y;
 	res[x + y*N] = A[x + y*N] - B[x + y*N];
 }
 
 __global__ void mat_mult(float * A, float * B, float * res)
 {
-	int x = threadIdx.x;
-	int y = threadIdx.y;
+	int x = threadIdx.x + blockIdx.x *blockDim.x;
+	int y = threadIdx.y + blockIdx.y *blockDim.y;
 
 	float result = 0;
 	for(int i = 0; i < N; i++)
@@ -89,7 +90,9 @@ void mat_mult_serial(float * A, float * B, float * res)
 
 int main(int argc, char** argv)
 {
-	dim3 threadsPerBlock(N,N);
+	dim3 threadsPerBlock(16,16);
+	dim3 numBlocks((int)ceil((float)N / threadsPerBlock.x), (int)ceil((float)N/threadsPerBlock.y));
+
 	cudaMalloc((void**)&dev_matA, N*N*sizeof(float));
 	cudaMalloc((void**)&dev_matB, N*N*sizeof(float));
 	cudaMalloc((void**)&dev_res, N*N*sizeof(float));
@@ -99,17 +102,17 @@ int main(int argc, char** argv)
 	cudaMemcpy(dev_matA, matA, N*N*sizeof(float), cudaMemcpyHostToDevice);
 	cudaMemcpy(dev_matB, matB, N*N*sizeof(float), cudaMemcpyHostToDevice);
 
-	mat_add<<<1, threadsPerBlock>>>(dev_matA, dev_matB, dev_res);
+	mat_add<<<numBlocks, threadsPerBlock>>>(dev_matA, dev_matB, dev_res);
 	cudaMemcpy(res, dev_res, N*N*sizeof(float), cudaMemcpyDeviceToHost);
 	cout<< endl << "###########parallel mat_add test######## ";
 	printRes();
 
-	mat_sub<<<1, threadsPerBlock>>>(dev_matA, dev_matB, dev_res);
+	mat_sub<<<numBlocks, threadsPerBlock>>>(dev_matA, dev_matB, dev_res);
 	cudaMemcpy(res, dev_res, N*N*sizeof(float), cudaMemcpyDeviceToHost);
 	cout<< endl << "###########parallel mat_add test######## ";
 	printRes();
 
-	mat_mult<<<1, threadsPerBlock>>>(dev_matA, dev_matB, dev_res);
+	mat_mult<<<numBlocks, threadsPerBlock>>>(dev_matA, dev_matB, dev_res);
 	cudaMemcpy(res, dev_res, N*N*sizeof(float), cudaMemcpyDeviceToHost);
 	cout<< endl << "###########parallel mat_mul test######## ";
 	printRes();
@@ -126,4 +129,6 @@ int main(int argc, char** argv)
 	cout<< endl << "###########serial mat_mul test######## ";
 	printRes();
 
+	int in;
+	cin >> in;
 }
