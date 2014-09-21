@@ -4,7 +4,7 @@ NVCC     = nvcc -m64
 CC       = gcc -m64
 CPPC     = g++ -m64
 
-CUDA_FLAGS = -I/usr/local/cuda/samples/common/inc -I/usr/local/cuda/include
+CUDA_FLAGS = -I/Developer/NVIDIA/CUDA-6.5/extras/CUPTI/include/GL -I/usr/local/cuda/samples/common/inc -I/usr/local/cuda/include 
 
 LFLAGS = -lglut -lGL -lGLEW 
 
@@ -19,7 +19,7 @@ glslUtility.o: ../src/glslUtility.cpp
 utilities.o: ../src/utilities.cpp
 	$(CPPC) $(CUDA_FLAGS) ../src/utilities.cpp -c
 
-main.o: ../src/main.cpp ../src/glslUtility.h ../src/kernel.h ../src/utilities.h ../src/main.h
+main.o: ../src/main.cpp ../src/glslUtility.h ../src/kernel.h ../src/utilities.h ../src/main.h /Developer/NVIDIA/CUDA-6.5/extras/CUPTI/include/GL/gl.h
 	$(CPPC) $(CUDA_FLAGS) ../src/main.cpp -c
 
 565simulator: main.o kernel.o glslUtility.o utilities.o
