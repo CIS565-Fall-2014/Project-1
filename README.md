@@ -1,3 +1,23 @@
+N = 1000
+blockSize = 128
+fps: 9.3
+
+N = 1000
+blockSize = 256
+fps: 9.3
+
+N = 1000
+blockSize = 512
+fps: 9.3
+
+N = 1000
+blockSize = 64
+fps: 6.7
+
+N = 1000
+blockSize = 32
+fps: 3.3
+
 Project 1
 =========
 

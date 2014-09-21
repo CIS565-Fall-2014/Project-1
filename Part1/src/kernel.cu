@@ -84,10 +84,6 @@ __global__ void generateCircularVelArray(int time, int N, glm::vec3 * arr, glm::
     }
 }
 
-__global__ void computeAccelerate(float mass){
-
-}
-
 // TODO: Core force calc kernel global memory
 //		 HINT : You may want to write a helper function that will help you 
 //              calculate the acceleration contribution of a single body.
@@ -95,20 +91,6 @@ __global__ void computeAccelerate(float mass){
 __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 {
 	glm::vec3 acce = glm::vec3(0.0f);;
-
-	//for(int i = 0; i < N; ++i){
-
-	//	glm::vec3 dis = glm::vec3(their_pos[i].x - my_pos.x, their_pos[i].y - my_pos.y, their_pos[i].z - my_pos.z);
-	//	float length = glm::length(dis) + 0.1;
-	//	glm::vec3 unit = dis / length;
-
-	//	acce += (float)G * their_pos[i].w /(length * length) * unit ;
-
-	//}
-	//glm::vec3 dis = glm::vec3(0 - my_pos.x, 0 - my_pos.y, 0 - my_pos.z);
-	//float length = glm::length(dis) + 0.1;
-	//glm::vec3 unit = dis / length;
-	//acce += (float)G * starMass /(length * length) * unit ;
 
 	for(int i = 0; i < N; ++i){
 		float rx = their_pos[i].x - my_pos.x;
@@ -122,17 +104,6 @@ __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 		acce.z += (float)G * their_pos[i].w / disCube * rz;
 	}
 
-	float rx = -my_pos.x;
-	float ry = -my_pos.y;
-	float rz = -my_pos.z;
-	float disSqr = rx * rx + ry* ry + rz * rz;
-	float dis = sqrt(disSqr) + 0.1f;
-	float disCube = dis * dis * dis;
-	acce.x += (float)G * starMass / disCube * rx;
-	acce.y += (float)G * starMass / disCube * ry;
-	acce.z += (float)G * starMass / disCube * rz;
-
-
     return acce;
 }
 
@@ -140,9 +111,39 @@ __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 __global__ void updateF(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
 	// FILL IN HERE
+
 	int index = threadIdx.x + (blockIdx.x * blockDim.x);
+	int bx = blockIdx.x * blockDim.x;
+	int tx = threadIdx.x;
+
+	__shared__ glm::vec4 share[blockSize];
+
 	if(index < N){
-		glm::vec3 accValue = accelerate(N, pos[index], pos);
+		int div = (int)ceil((float)N/(float)blockSize);
+
+		glm::vec3 accValue;
+		for (int m = 0; m < div; ++m) {
+			share[tx] = pos[m * blockSize + tx];
+			__syncthreads();
+
+
+			if(m == div-1)
+				accValue += accelerate(N % blockSize, pos[index], share);
+			else
+				accValue += accelerate(blockSize, pos[index], share);
+
+			__syncthreads();
+		}
+
+		float rx = -pos[index].x;
+		float ry = -pos[index].y;
+		float rz = -pos[index].z;
+		float disSqr = rx * rx + ry* ry + rz * rz;
+		float dis = sqrt(disSqr) + 0.1f;
+		float disCube = dis * dis * dis;
+		accValue.x += (float)G * starMass / disCube * rx;
+		accValue.y += (float)G * starMass / disCube * ry;
+		accValue.z += (float)G * starMass / disCube * rz;
 
 		acc[index].x = accValue.x;
 		acc[index].y = accValue.y;
