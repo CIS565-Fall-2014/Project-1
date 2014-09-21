@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <iostream>
 #include <conio.h>
+#include <ctime>
+#include <Windows.h>
 
 
 using namespace std;
@@ -77,6 +79,15 @@ int main(int argc, char** argv)
 		}
 	}
 
+	LARGE_INTEGER begin, end;
+	LARGE_INTEGER frequency;
+	QueryPerformanceFrequency(&frequency);
+
+	cudaEvent_t start, stop;
+	float time;
+	cudaEventCreate(&start);
+	cudaEventCreate(&stop);
+
 	// Parallel Matrix Add
 	float* parC = new float[25];
 	float *Ad, *Bd, *Cd;
@@ -87,18 +98,26 @@ int main(int argc, char** argv)
 	cudaMemcpy(Bd, B, size, cudaMemcpyHostToDevice);
 	cudaMalloc(&Cd, size);
 
+	cudaEventRecord(start, 0);
 	mat_add<<<dimGrid, dimBlock>>>(Ad, Bd, Cd, 5);
+	cudaEventRecord(stop, 0);
+	cudaEventSynchronize(stop);
 
 	cudaMemcpy(parC, Cd, size, cudaMemcpyDeviceToHost);
 	cudaFree(Cd);
+	cudaEventElapsedTime(&time, start, stop);
+	printf("Kernel: %f ms\t", time);
 
 	// Serial Matrix Add
+	QueryPerformanceCounter(&begin);
 	float* serC = new float[25];
 	for (int i = 0; i < 5; i++) {
 		for (int j = 0; j < 5; j++) {
 			serC[i * 5 + j] = A[i * 5 + j] + B[i * 5 + j];
 		}
 	}
+	QueryPerformanceCounter(&end);
+	printf("CPU: %f ms\n", (end.QuadPart - begin.QuadPart) * 1000.0 / frequency.QuadPart);
 
 	if (equals(parC, serC, 5)) {
 		cout << "Correct matrix add" << endl;
@@ -115,18 +134,26 @@ int main(int argc, char** argv)
 	float* Dd;
 	cudaMalloc(&Dd, size);
 
+	cudaEventRecord(start, 0);
 	mat_sub<<<dimGrid, dimBlock>>>(Ad, Bd, Dd, 5);
+	cudaEventRecord(stop, 0);
+	cudaEventSynchronize(stop);
 
 	cudaMemcpy(parD, Dd, size, cudaMemcpyDeviceToHost);
 	cudaFree(Dd);
+	cudaEventElapsedTime(&time, start, stop);
+	printf("Kernel: %f ms\t", time);
 
 	// Serial Matrix Sub
+	QueryPerformanceCounter(&begin);;
 	float* serD = new float[25];
 	for (int i = 0; i < 5; i++) {
 		for (int j = 0; j < 5; j++) {
 			serD[i * 5 + j] = A[i * 5 + j] - B[i * 5 + j];
 		}
 	}
+	QueryPerformanceCounter(&end);
+	printf("CPU: %f ms\n", (end.QuadPart - begin.QuadPart) * 1000.0 / frequency.QuadPart);
 
 	if (equals(parD, serD, 5)) {
 		cout << "Correct matrix sub" << endl;
@@ -143,7 +170,15 @@ int main(int argc, char** argv)
 	float* Ed;
 	cudaMalloc(&Ed, size);
 
+	cudaEventRecord(start, 0);
 	mat_mult<<<dimGrid, dimBlock>>>(Ad, Bd, Ed, 5);
+	cudaEventRecord(stop, 0);
+	cudaEventSynchronize(stop);
+
+	cudaMemcpy(parE, Ed, size, cudaMemcpyDeviceToHost);
+	cudaFree(Ed);
+	cudaEventElapsedTime(&time, start, stop);
+	printf("Kernel: %f ms\t", time);
 
 	cudaMemcpy(parE, Ed, size, cudaMemcpyDeviceToHost);
 	cudaFree(Ad);
@@ -151,6 +186,7 @@ int main(int argc, char** argv)
 	cudaFree(Ed);
 	
 	// Serial Matrix Mult
+	QueryPerformanceCounter(&begin);
 	float* serE = new float[25];
 	int sum = 0;
 	for (int i = 0; i < 5; i++) {
@@ -161,6 +197,8 @@ int main(int argc, char** argv)
 			sum = 0;
 		}
 	}
+	QueryPerformanceCounter(&end);
+	printf("CPU: %f ms\n", (end.QuadPart - begin.QuadPart) * 1000.0 / frequency.QuadPart);
 
 	if (equals(parE, serE, 5)) {
 		cout << "Correct matrix mult" << endl;
