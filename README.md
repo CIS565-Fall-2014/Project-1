@@ -1,7 +1,7 @@
-Project 1
+Project 1: Introduction to CUDA
 =========
 
-# Project 1 : Introduction to CUDA
+# Answer to Qs
 
 
 How does changing the tile and block sizes change performance? Why?
