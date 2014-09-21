@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0.0)
 
-project(CIS565_PROJ_1)
+project(565simulator)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
@@ -31,7 +31,7 @@ endif()
 
 #Compiler flag magic
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -m64 -msse2")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -mtune=native")
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 	set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}   -O0 -g")
 endif()
@@ -42,13 +42,7 @@ endif()
 #Crucial magic for CUDA linking
 find_package(CUDA REQUIRED)
 set(CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE ON)
-
 set(CUDA_SEPARABLE_COMPILATION ON)
-
-#Make NVCC run silently
-if(${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    #set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS}-w;")
-endif()
 
 #Force Visual Studio to link against MT versions of libs
 if(MSVC)
@@ -75,9 +69,9 @@ set(SOURCE_FILES ${SOURCE_FILES}
     "src/glslUtility.cpp"
     )
 
-cuda_add_executable(CIS565_PROJ_1 ${SOURCE_FILES} OPTIONS -arch=sm_20)
+cuda_add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILES} OPTIONS -arch=sm_20)
 
-target_link_libraries(CIS565_PROJ_1 ${CORELIBS})
+target_link_libraries(${CMAKE_PROJECT_NAME} ${CORELIBS})
 
 file(COPY shaders
     DESTINATION .)
