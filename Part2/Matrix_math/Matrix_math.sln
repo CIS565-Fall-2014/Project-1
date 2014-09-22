@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Matrix_math", "Matrix_math\Matrix_math.vcxproj", "{88D7C9B9-8065-4912-8561-A15539ABE405}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "matrix_cpu", "matrix_cpu\matrix_cpu.vcxproj", "{7AE7EE73-9D50-4A8B-AAE6-0ED6A81C5D43}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{88D7C9B9-8065-4912-8561-A15539ABE405}.Debug|Win32.ActiveCfg = Debug|Win32
+		{88D7C9B9-8065-4912-8561-A15539ABE405}.Debug|Win32.Build.0 = Debug|Win32
+		{88D7C9B9-8065-4912-8561-A15539ABE405}.Debug|x64.ActiveCfg = Debug|x64
+		{88D7C9B9-8065-4912-8561-A15539ABE405}.Debug|x64.Build.0 = Debug|x64
+		{88D7C9B9-8065-4912-8561-A15539ABE405}.Release|Win32.ActiveCfg = Release|Win32
+		{88D7C9B9-8065-4912-8561-A15539ABE405}.Release|Win32.Build.0 = Release|Win32
+		{88D7C9B9-8065-4912-8561-A15539ABE405}.Release|x64.ActiveCfg = Release|x64
+		{88D7C9B9-8065-4912-8561-A15539ABE405}.Release|x64.Build.0 = Release|x64
+		{7AE7EE73-9D50-4A8B-AAE6-0ED6A81C5D43}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7AE7EE73-9D50-4A8B-AAE6-0ED6A81C5D43}.Debug|Win32.Build.0 = Debug|Win32
+		{7AE7EE73-9D50-4A8B-AAE6-0ED6A81C5D43}.Debug|x64.ActiveCfg = Debug|Win32
+		{7AE7EE73-9D50-4A8B-AAE6-0ED6A81C5D43}.Release|Win32.ActiveCfg = Release|Win32
+		{7AE7EE73-9D50-4A8B-AAE6-0ED6A81C5D43}.Release|Win32.Build.0 = Release|Win32
+		{7AE7EE73-9D50-4A8B-AAE6-0ED6A81C5D43}.Release|x64.ActiveCfg = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

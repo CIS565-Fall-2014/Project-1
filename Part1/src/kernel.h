@@ -6,7 +6,7 @@
 #include <cuda.h>
 #include <cmath>
 
-#define blockSize 128
+#define blockSize 256
 #define checkCUDAErrorWithLine(msg) checkCUDAError(msg, __LINE__)
 #define SHARED 0
 

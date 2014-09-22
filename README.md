@@ -118,3 +118,15 @@ describe the changes you make between experiments and how you are benchmarking.
 Please commit your changes to your forked version of the repository and open a
 pull request.  Please write your performance analysis in your README.md.
 Remember to email Harmony (harmoli+CIS565@seas.upenn.edu) your grade and why.
+
+
+
+
+How does changing the tile and block sizes change performance? Why?
+increasing block size will gain performance while registers in a single block is not fully used. However if the block size reaches the level that all registers are used, the performance will decrease. Increasing tile size will gain performance because we can utilize shared memory.
+
+How does changing the number of planets change performance? Why?
+If the number of planets is smaller than the number of threads, it will not affect the performance. Otherwise, increasing the number of planets will slow down the program. Because it is embarrasing parallel problem.all threads are calculated parallelly. If the number of planets are greater than the threads, a thread will have to wait to calculate other planets before completing the current one.
+
+Without running experiments, how would you expect the serial and GPU verions of matrix_math to compare? Why?
+We can compare the runtime of computing matrices of different sizes. We can expect that when size is small, CPU version is faster because CPU runs faster than GPU at single thread. However when matrix size exceed a certain level, GPU version runs faster because it is massively parallel.

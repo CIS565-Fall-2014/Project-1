@@ -9,10 +9,11 @@
 dim3 threadsPerBlock(blockSize);
 
 int numObjects;
-const float planetMass = 3e8;
+const __device__ float planetMass = 3e8;
 const __device__ float starMass = 5e10;
 
 const float scene_scale = 2e2; //size of the height map in simulation space
+
 
 glm::vec4 * dev_pos;
 glm::vec3 * dev_vel;
@@ -87,21 +88,63 @@ __global__ void generateCircularVelArray(int time, int N, glm::vec3 * arr, glm::
 //		 HINT : You may want to write a helper function that will help you 
 //              calculate the acceleration contribution of a single body.
 //		 REMEMBER : F = (G * m_a * m_b) / (r_ab ^ 2)
+
+__device__ glm::vec3 acc_pair(int N, glm::vec4 my_pos, glm::vec4 other_pos, int star)
+{
+	float coef=0;
+	glm::vec3 dir(0);
+	dir =  glm::vec3(other_pos.x - my_pos.x,other_pos.y - my_pos.y, 0);
+	float len = glm::length(dir);
+	if(len < ZERO_ABSORPTION_EPSILON)
+		return glm::vec3(0);
+	else
+	{
+		if(star >0 )
+			coef = G * starMass / (len * len *len);
+		else
+			coef = G* planetMass / (len * len *len);
+	}
+	return coef * dir;
+}
+
 __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 {
-    return glm::vec3(0.0f);
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+	glm::vec3 acc(0);
+	if(index < N)
+	{
+		//star acc
+		acc = acc_pair(N, my_pos,their_pos[0],1);
+		for(int i=0; i < N; ++i){
+			acc +=  acc_pair(N,my_pos,their_pos[i],0);
+		}
+	}
+    return acc;
 }
+
 
 // TODO : update the acceleration of each body
 __global__ void updateF(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
 	// FILL IN HERE
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+	if(index < N)
+	{
+		acc[index] = accelerate(N,pos[index],pos);
+	}
 }
 
 // TODO : update velocity and position using a simple Euler integration scheme
 __global__ void updateS(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
 	// FILL IN HERE
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+	if(index < N)
+	{
+		vel[index] += acc[index] * dt;
+		pos[index] += glm::vec4(vel[index] *dt,0);
+		
+	}
 }
 
 // Update the vertex buffer object
@@ -180,6 +223,10 @@ void initCuda(int N)
 void cudaNBodyUpdateWrapper(float dt)
 {
 	// FILL IN HERE
+	dim3 fullBlocksPerGrid((int)ceil(float(numObjects)/float(blockSize)));
+	updateF<<<fullBlocksPerGrid, blockSize>>>(numObjects,dt,dev_pos,dev_vel,dev_acc);
+	updateS<<<fullBlocksPerGrid, blockSize>>>(numObjects,dt,dev_pos,dev_vel,dev_acc);
+
 }
 
 void cudaUpdateVBO(float * vbodptr, int width, int height)
