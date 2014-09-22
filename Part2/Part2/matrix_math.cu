@@ -1,7 +1,7 @@
 
 #include <stdio.h>
 #include <cuda_runtime.h>
-#define MatrixWidth 5
+#define MatrixWidth 10
 
 
 //GPU matrix add function
@@ -115,8 +115,8 @@ int main(){
 	//mat_add<<< BlocksPerGrid,ThreadsPerBlock>>>(d_A,d_B,d_C,Size);
 	//mat_sub<<< BlocksPerGrid,ThreadsPerBlock>>>(d_A,d_B,d_C,Size);
 	mat_mult<<< BlocksPerGrid,ThreadsPerBlock>>>(d_A,d_B,d_C,Size);
-    //mat_add_serial(A,B,C);
-	//mat_sub_serial(A,B,C);
+    //mat_add_serial(A,B,C,Size);
+	//mat_sub_serial(A,B,C,Size);
 	//mat_mult_serial(A,B,C);
 	
 	cudaEventRecord(end,0);

@@ -85,6 +85,7 @@
     </CudaCompile>
     <CudaCompile>
       <Include>$(CudaToolkitIncludeDir)</Include>
+      <PtxAsOptionV>false</PtxAsOptionV>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
