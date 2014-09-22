@@ -94,7 +94,7 @@ __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 
 	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
 	
-	for (int i = 0; i < their_pos->length(); i++){
+	for (int i = 0; i < N; i++){
 		r_ab = glm::vec3(their_pos[i].x - my_pos.x, their_pos[i].y - my_pos.y, their_pos[i].z - my_pos.z);
 		if (i != index){
 			float l = pow(glm::length(r_ab), 3);
@@ -176,7 +176,7 @@ __global__ void sendToPBO(int N, glm::vec4 * pos, float4 * pbo, int width, int h
     float c_scale_h = height / s_scale;
 
     glm::vec3 color(0.05, 0.15, 0.3);
-    glm::vec3 acc = accelerate(N, glm::vec4((x-w2)/c_scale_w,(y-h2)/c_scale_h,0,1), pos);
+    glm::vec3 acc(0.0); //= accelerate(N, glm::vec4((x-w2)/c_scale_w,(y-h2)/c_scale_h,0,1), pos);
 
     if(x<width && y<height)
     {
