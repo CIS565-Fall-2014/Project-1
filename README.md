@@ -17,7 +17,7 @@ The following table shows the fps with different number of planets and block siz
 * Changing the number of planets affects the performance a lot. This makes sense because our for loop in the device function will run the N times, where N is the number of planets. 
 
 ----------------------------------------------------------------
-* Without running experiments, I would expect mat_add funciton and mat_sub function
+* Without running experiments, I would expect mat_add funciton and mat_sub function running on GPU will be much faster than CPU version. Because the add and subtracte operations are totally parellel. Although matrix multiply operation is also parellel, it has to spend a lot of time to read memory. Thus the running time could be similar for GPU and CPU version of mat_mult. 
 
 
 
