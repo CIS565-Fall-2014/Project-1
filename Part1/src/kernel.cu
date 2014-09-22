@@ -9,9 +9,8 @@
 dim3 threadsPerBlock(blockSize);
 
 int numObjects;
-const float planetMass = 3e8;
+const float planetMass = 3e7;
 const __device__ float starMass = 5e10;
-const __device__ float GravitationalConstant = 6.673e-11;
 
 const float scene_scale = 2e2; //size of the height map in simulation space
 
@@ -100,7 +99,7 @@ __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 
 	totalF += universalForce(my_pos,glm::vec4(0.0f,0.0f,0.0f,starMass));
 
-	return totalF/my_pos.w;
+	return totalF;
 }
 
 
@@ -108,9 +107,8 @@ __device__ glm::vec3 universalForce(glm::vec4 pos1,glm::vec4 pos2)
 {
 	glm::vec3 dir = glm::vec3(pos2) - glm::vec3(pos1);
 	float r = glm::length(dir) + 0.00001f;
-	dir = dir/r;
 
-	glm::vec3 F =(float) G * dir *pos1.w *pos2.w /(r*r);
+	glm::vec3 F =(float) G * dir *pos2.w /(r*r*r);
 	return F;
 }
 
