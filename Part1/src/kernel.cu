@@ -90,26 +90,39 @@ __global__ void generateCircularVelArray(int time, int N, glm::vec3 * arr, glm::
 __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 {
 	glm::vec3 force(0.0f);
-	for (int i = 0; i < N; i++) {
-		force +=  glm::vec3(their_pos[i] - my_pos) *
-			(float) (G * planetMass * planetMass / pow(glm::length(my_pos - their_pos[i]), 2));
+	int i = blockIdx.x * blockDim.x + threadIdx.x;
+	float mag = 0;
+
+	for (int idx = 0; idx < N; idx++) {
+		if (i != idx) {
+			mag = G * planetMass * planetMass / (pow(glm::length(their_pos[idx] - my_pos), 2) + EPSILON);
+			force += glm::normalize(glm::vec3(my_pos - their_pos[idx])) * mag;
+		}
 	}
-    return force;
+
+	mag = G * planetMass * starMass / (pow(glm::length(my_pos), 2) + EPSILON);
+	force += glm::normalize(-1.f * glm::vec3(my_pos)) * mag;
+
+    return force / planetMass;
 }
 
 // TODO : update the acceleration of each body
 __global__ void updateF(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
-	for (int i = 0; i < N; i++) {
-		*acc = accelerate(N, pos[i], pos);
-	}
+	int i = blockIdx.x * blockDim.x + threadIdx.x;
+	if (i < N)
+		acc[i] = accelerate(N, pos[i], pos);
 }
 
 // TODO : update velocity and position using a simple Euler integration scheme
 __global__ void updateS(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
-	for (int i = 0; i < N; i++) {
-		*pos = glm::vec4(*pos + dt * glm::vec4(*vel, 0));
+	int i = blockIdx.x * blockDim.x + threadIdx.x;
+	if (i < N) {
+		vel[i] += dt * acc[i];
+		pos[i].x += dt * vel[i].x;
+		pos[i].y += dt * vel[i].y;
+		pos[i].z += dt * vel[i].z;
 	}
 }
 
@@ -188,7 +201,9 @@ void initCuda(int N)
 // TODO : Using the functions you wrote above, write a function that calls the CUDA kernels to update a single sim step
 void cudaNBodyUpdateWrapper(float dt)
 {
-	// FILL IN HERE
+	dim3 blocks((int)ceil(float(numObjects)/float(blockSize)));
+	updateF<<<blocks, blockSize>>>(numObjects, dt, dev_pos, dev_vel, dev_acc);
+	updateS<<<blocks, blockSize>>>(numObjects, dt, dev_pos, dev_vel, dev_acc);
 }
 
 void cudaUpdateVBO(float * vbodptr, int width, int height)
