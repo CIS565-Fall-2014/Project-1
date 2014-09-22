@@ -6,8 +6,8 @@ Project 1
 ## PERFORMANCE ANALYSIS
 * How does changing the tile and block sizes change performance? Why?
 * How does changing the number of planets change performance? Why?
-The following table shows the fps with different number of particles and block size.
 --------------------------------------------------------
+The following table shows the fps with different number of particles and block size.
 | particle #|     Block Size=128    |  Block Size=256  | Block Size=512|
 |:---------:|:-----------------:|:-----------------:|:-----------:|
 |    1000     |         60       |       60       |  60|
