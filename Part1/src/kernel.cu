@@ -89,19 +89,58 @@ __global__ void generateCircularVelArray(int time, int N, glm::vec3 * arr, glm::
 //		 REMEMBER : F = (G * m_a * m_b) / (r_ab ^ 2)
 __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 {
-    return glm::vec3(0.0f);
+    glm::vec3 F(0.0f,0.0f,0.0f);
+	glm::vec3 r_ab;
+
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+	
+	for (int i = 0; i < N; i++){
+		r_ab = glm::vec3(their_pos[i].x - my_pos.x, their_pos[i].y - my_pos.y, their_pos[i].z - my_pos.z);
+		if (i != index){
+			float l = pow(glm::length(r_ab), 3);
+			if (l < 0.1) l = 0.1;
+			float f_scale = (float)G*their_pos[i].w / l;
+			F.x += f_scale*r_ab.x;
+			F.y += f_scale*r_ab.y;
+			F.z += f_scale*r_ab.z;
+		}
+	}	
+	//force from center star
+	glm::vec3 r_star(-my_pos.x, -my_pos.y, -my_pos.z);
+	float l = pow(glm::length(r_star), 3);
+	if (l < 0.1) l = 0.1;
+	float f_scale = (float)G*starMass /l;
+
+	F.x += f_scale*r_star.x;
+	F.y += f_scale*r_star.y;
+	F.z += f_scale*r_star.z;
+	
+    return F;
 }
 
 // TODO : update the acceleration of each body
 __global__ void updateF(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
-	// FILL IN HERE
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+	if(index < N)
+    {
+		acc[index] = accelerate(N, pos[index], pos); 
+	}
 }
 
 // TODO : update velocity and position using a simple Euler integration scheme
 __global__ void updateS(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
-	// FILL IN HERE
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+	if(index < N)
+    {
+		glm::vec3 v0 = vel[index];
+		vel[index] += acc[index]*dt;
+		pos[index].x += 0.5*(v0.x + vel[index].x)*dt;
+		pos[index].y += 0.5*(v0.y + vel[index].y)*dt;
+		pos[index].z += 0.5*(v0.z + vel[index].z)*dt;
+	}
+
 }
 
 // Update the vertex buffer object
@@ -137,7 +176,7 @@ __global__ void sendToPBO(int N, glm::vec4 * pos, float4 * pbo, int width, int h
     float c_scale_h = height / s_scale;
 
     glm::vec3 color(0.05, 0.15, 0.3);
-    glm::vec3 acc = accelerate(N, glm::vec4((x-w2)/c_scale_w,(y-h2)/c_scale_h,0,1), pos);
+    glm::vec3 acc(0.0); //= accelerate(N, glm::vec4((x-w2)/c_scale_w,(y-h2)/c_scale_h,0,1), pos);
 
     if(x<width && y<height)
     {
@@ -179,7 +218,13 @@ void initCuda(int N)
 // TODO : Using the functions you wrote above, write a function that calls the CUDA kernels to update a single sim step
 void cudaNBodyUpdateWrapper(float dt)
 {
-	// FILL IN HERE
+	
+
+    dim3 fullBlocksPerGrid((int)ceil(float(numObjects)/float(blockSize)));
+
+	updateF<<<fullBlocksPerGrid, blockSize>>>(numObjects,dt,dev_pos,dev_vel,dev_acc);
+	updateS<<<fullBlocksPerGrid, blockSize>>>(numObjects,dt,dev_pos,dev_vel,dev_acc);
+    cudaThreadSynchronize();
 }
 
 void cudaUpdateVBO(float * vbodptr, int width, int height)
