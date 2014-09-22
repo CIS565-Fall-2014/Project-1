@@ -13,7 +13,7 @@ The following table shows the fps with different number of particles and block s
 |    1000     |         60       |       60       |  60|
 |    2000     |         40        |       40       | 40|
 |   5000     |         20        |       20        | 20|
-
+------------------
 
 
 * Without running experiments, how would you expect the serial and GPU verions
