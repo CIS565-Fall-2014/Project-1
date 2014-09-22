@@ -83,25 +83,48 @@ __global__ void generateCircularVelArray(int time, int N, glm::vec3 * arr, glm::
     }
 }
 
-// TODO: Core force calc kernel global memory
+__device__ glm::vec3 calcAccel(float m_o, glm::vec3 p_i, glm::vec3 p_o)
+{
+    glm::vec3 r = p_o - p_i;
+    float R = glm::length(r);
+    if (R < 1) {
+        return glm::vec3();
+    } else {
+        return r * (m_o / (R * R * R));
+    }
+}
+
+// Core force calc kernel global memory
 //		 HINT : You may want to write a helper function that will help you 
 //              calculate the acceleration contribution of a single body.
 //		 REMEMBER : F = (G * m_a * m_b) / (r_ab ^ 2)
 __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 {
-    return glm::vec3(0.0f);
+    glm::vec3 p = glm::vec3(my_pos);
+    glm::vec3 a;
+
+    a += calcAccel(starMass, p, glm::vec3());
+    for (int o = 0; o < N; ++o) {
+        a += calcAccel(planetMass, p, glm::vec3(their_pos[o]));
+    }
+
+    float _G = G;
+    return a * _G;
 }
 
-// TODO : update the acceleration of each body
+// update the acceleration of each body
 __global__ void updateF(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
-	// FILL IN HERE
+    int i = threadIdx.x + (blockIdx.x * blockDim.x);
+    acc[i] = accelerate(N, pos[i], pos);
 }
 
-// TODO : update velocity and position using a simple Euler integration scheme
+// update velocity and position using a simple Euler integration scheme
 __global__ void updateS(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
-	// FILL IN HERE
+    int i = threadIdx.x + (blockIdx.x * blockDim.x);
+    vel[i] += dt * acc[i];
+    pos[i] = glm::vec4(glm::vec3(pos[i]) + dt * vel[i], 1);
 }
 
 // Update the vertex buffer object
@@ -137,11 +160,12 @@ __global__ void sendToPBO(int N, glm::vec4 * pos, float4 * pbo, int width, int h
     float c_scale_h = height / s_scale;
 
     glm::vec3 color(0.05, 0.15, 0.3);
-    glm::vec3 acc = accelerate(N, glm::vec4((x-w2)/c_scale_w,(y-h2)/c_scale_h,0,1), pos);
+    //glm::vec3 acc = accelerate(N, glm::vec4((x-w2)/c_scale_w,(y-h2)/c_scale_h,0,1), pos);
 
     if(x<width && y<height)
     {
-        float mag = sqrt(sqrt(acc.x*acc.x + acc.y*acc.y + acc.z*acc.z));
+        //float mag = sqrt(sqrt(acc.x*acc.x + acc.y*acc.y + acc.z*acc.z));
+        float mag = 1.0f;
         
 		// Each thread writes one pixel location in the texture (textel)
         pbo[index].w = (mag < 1.0f) ? mag : 1.0f;
@@ -176,10 +200,61 @@ void initCuda(int N)
 	cudaThreadSynchronize();
 }
 
-// TODO : Using the functions you wrote above, write a function that calls the CUDA kernels to update a single sim step
+// Using the functions you wrote above, write a function that calls the CUDA kernels to update a single sim step
 void cudaNBodyUpdateWrapper(float dt)
 {
-	// FILL IN HERE
+#if PERFTEST
+    static bool uninit = true;
+    static cudaEvent_t ev0;
+    static cudaEvent_t ev1;
+    static cudaEvent_t ev2;
+    if (uninit) {
+        uninit = false;
+        cudaEventCreate(&ev0);
+        cudaEventCreate(&ev1);
+        cudaEventCreate(&ev2);
+    }
+
+    static int i = 0;
+    static int b = 8;
+
+    if (b > 1024) {
+        exit(0);
+    }
+#else
+    static const int b = 64;
+#endif
+
+    int g = ceil(float(numObjects)/float(b));
+
+#if PERFTEST
+    cudaEventRecord(ev0, 0);
+#endif
+    updateF<<<g, b>>>(numObjects, dt, dev_pos, dev_vel, dev_acc);
+#if PERFTEST
+    cudaEventRecord(ev1, 0);
+#endif
+    updateS<<<g, b>>>(numObjects, dt, dev_pos, dev_vel, dev_acc);
+#if PERFTEST
+    cudaEventRecord(ev2, 0);
+
+    static float tt01, tt12;
+    float t01, t12;
+    cudaEventSynchronize(ev2);
+    cudaEventElapsedTime(&t01, ev0, ev1);
+    cudaEventElapsedTime(&t12, ev1, ev2);
+    tt01 += t01;
+    tt12 += t12;
+
+    if (i < 4) {
+        i++;
+    } else {
+        i = 0;
+        printf("%d %d %d %f %f\n", numObjects, g, b, tt01 / 4, tt12 / 4);
+        b += 8;
+        tt01 = tt12 = 0;
+    }
+#endif
 }
 
 void cudaUpdateVBO(float * vbodptr, int width, int height)
