@@ -107,7 +107,7 @@ __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 		
 		glm::vec3 r_ab=glm::vec3(my_pos.x-their_pos[index].x,my_pos.y-their_pos[index].y,0.0f);
 		glm::vec3 acc=r_ab;
-		acc*=G*starMass/glm::pow(glm::length(r_ab),3.0f);
+		acc*=G*starMass/glm::pow(glm::length(r_ab),3.0f)*0.0f;
 		for(int i=0;i<N;i++)
 			acc+=accelerateEachOther(N, their_pos[index], their_pos[i]);
 		return acc;
@@ -128,9 +128,9 @@ __global__ void updateF(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::
 		glm::vec3 r_ab=glm::vec3(-pos[index].x,-pos[index].y,0.0f);
 		glm::vec3 tmp=r_ab;
 		tmp*=G*starMass/glm::pow(glm::length(r_ab),3.0f);
-		//acc[index]=tmp;
+		acc[index]=tmp*0.0f;
 		for(int i=0;i<N;i++)
-			acc[index]=accelerateEachOther(N, pos[index], pos[i]);
+			acc[index]+=accelerateEachOther(N, pos[index], pos[i]);
 		acc[index]*=planetMass;
 		acc[index]+=tmp;
 		//return acc;
