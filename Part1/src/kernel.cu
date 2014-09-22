@@ -5,6 +5,17 @@
 #include "utilities.h"
 #include "kernel.h"
 
+/*
+
+NOTES
+=====
+
+-Only works on computers with NVS 310s. Need less than 100 as N_FOR_VIS to get an fps above like 3 or 4.
+-const planetMass needs to be on __device__.
+-maybe something wrong with my equation setup, but get numbers too big (in 1000s) unless I divide by "factor" (see glm::vec3 accelerate())
+
+*/
+
 //GLOBALS
 dim3 threadsPerBlock(blockSize);
 
@@ -113,8 +124,6 @@ __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 
 	glm::vec3 result; // this function has to return something
 
-
-
 	int index = (blockIdx.x * blockDim.x) + threadIdx.x; // I don't know what this is, but it looks important. Seems like an index for the their_pos array
 	//if (index < N) // I actually have no idea what this is at all
 	//{
@@ -124,13 +133,14 @@ __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 
 	float factor = 5e7;
 
+	// not a good parallel implementation, but I don't know how to do a parallel reduction add, so this will suffice
 	for (int i = 0; i < N; i++) {
 		if (i == index) continue; // don't want div-by-0 errors, I think... I wrote this line pre-emptively, so I don't really know if I actually need it
 		r_vector_4 = their_pos[i] - my_pos;
 		r_vector = glm::vec3(r_vector_4);
 
-		F = G * planetMass * planetMass / pow(glm::length(r_vector)*factor, 2);
-		result += F * glm::normalize(r_vector)*factor;
+		F = G * planetMass * planetMass / pow(glm::length(r_vector), 2); // direct copy of equation
+		result += F * glm::normalize(r_vector)/factor; // multiply magnitude onto vector, add in "factor"
 	}
 
 
@@ -142,11 +152,10 @@ __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 	// NO, I AM WRONG, that function makes things go in circles upon initiation of the scene (otherwise it wouldn't look like a solar system).
 	// Thus I DO need to take into account the gravitational pull of the sun:
 	
-	r_vector = -1.f * glm::vec3(my_pos); // star is at (0,0,0)
+	r_vector = -1.f * glm::vec3(my_pos); // star is at (0,0,0), so it's (0,0,0) - my_pos
 	
-	//the way I've used "factor" below does exactly the same thing as the corresponding lines above
 	F = G * planetMass * starMass / pow(glm::length(r_vector), 2);
-	result += F * glm::normalize(r_vector)/factor;
+	result += F * glm::normalize(r_vector)/factor; // multiply magnitude onto vector, add in "factor"
 
 
 
