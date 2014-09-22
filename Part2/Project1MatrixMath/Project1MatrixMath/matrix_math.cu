@@ -11,8 +11,44 @@
 
 #define MAT_WIDTH 5
 
-//forward declare CPU helper method to display results
+// forward declare CPU helper method to display results
 void printResults(float*, char*);
+
+
+// kernels to run on GPU
+__global__ void mat_add(float* Md, float* Nd, float* Pd) {
+	int tx = threadIdx.x; // COLUMN counter: incr 1 -> add 1
+	int ty = threadIdx.y; // ROW counter:    incr 1 -> add 5 (or whatever MAT_WIDTH is)
+
+	int index = ty * MAT_WIDTH + tx;
+
+	Pd[index] = Md[index] + Nd[index];
+}
+
+__global__ void mat_sub(float* Md, float* Nd, float* Pd) {
+	int tx = threadIdx.x;
+	int ty = threadIdx.y;
+
+	int index = ty * MAT_WIDTH + tx;
+
+	Pd[index] = Md[index] - Nd[index];
+}
+
+__global__ void mat_mult(float* Md, float* Nd, float* Pd) {
+	int tx = threadIdx.x;
+	int ty = threadIdx.y;
+
+	float runningSum = 0.f; // to be used for calculation of the dot product
+
+	// M: move along a row, increment COLUMN counter
+	// N: move along a column, increment ROW counter
+	for (int k = 0; k < MAT_WIDTH; k++) {
+		runningSum += Md[ty*MAT_WIDTH + k] * Nd[tx + k*MAT_WIDTH];
+	}
+
+	Pd[ty * MAT_WIDTH + tx] = runningSum;
+}
+
 
 int main(int argc, char** argv) {
 
@@ -66,17 +102,24 @@ int main(int argc, char** argv) {
 	// Also the matrices are really small, so the optimization would add extra overhead.
 	// I could indeed look through the "CUDA Part 2" slides and copy over code optimized with tiles & shared memory
 	// but I'd rather not for this exercise. I will not be giving myself any bonus points for effort.
+
+	dim3 dimBlock(MAT_WIDTH, MAT_WIDTH);
+	dim3 dimGrid(1,1);
+
 	for (int i = 0; i < 3; i++) {
 		char* whichOp;
 		switch (i) {
 		case 0:
 			whichOp = "ADD";
+			mat_add<<<dimGrid, dimBlock>>>(Md, Nd, Pd);
 			break;
 		case 1:
 			whichOp = "SUBTRACT";
+			mat_sub<<<dimGrid, dimBlock>>>(Md, Nd, Pd);
 			break;
 		case 2:
 			whichOp = "MULTIPLY";
+			mat_mult<<<dimGrid, dimBlock>>>(Md, Nd, Pd);
 			break;
 		default:
 			//do nothing, this won't happen, just look at the for loop
