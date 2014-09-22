@@ -109,6 +109,8 @@ int main(int argc, char** argv) {
 	dim3 dimBlock(MAT_WIDTH, MAT_WIDTH);
 	dim3 dimGrid(1,1);
 
+
+	// print results. use the same P for each kernel - print before running the next operation
 	for (int i = 0; i < 3; i++) {
 		char* whichOp;
 		switch (i) {
@@ -172,7 +174,7 @@ void printResults (float* R, char* message) {
 	}
 }
 
-//serial versions
+//serial versions. code is basically the same as the GPU versions, with extra nested for loops
 void cpu_mat_add (float* R, float* M, float* N) {
 	for (int i = 0; i < MAT_WIDTH; i++) {
 		for (int j = 0; j < MAT_WIDTH; j++) {
