@@ -17,7 +17,6 @@ The following table shows the fps with different number of planets and block siz
 ------------------------------------------------------------
 * Changing the block size doesn't change the performance. I think this is because we are not using shared memory. Thus changing the number of blocks doesn't affect the performance.
 * Changing the number of planets affects the performance a lot. This makes sense because our for loop in the device function will run the N times, where N is the number of planets. 
---------------------------------------------------------------
 * Without running experiments, how would you expect the serial and GPU verions
   of matrix_math to compare?  Why?
 
