@@ -33,12 +33,12 @@ of 60 so I'm not really sure what's actually going on.
 
 This can be modified in kernel.h. On an NVS 310, with N_FOR_VIS always 500, with Release configuration:
  * The block size of 128 (baseline) gives an fps of about 15.
- * 1     ->     30 fps
- * 2     ->     30 fps
- * 3     ->     30 fps
- * 4     ->    ~36 fps
- * 8     ->     60 fps
- * 16    ->     30 fps
+ * 1     ->     30    fps
+ * 2     ->     30    fps
+ * 3     ->     30    fps
+ * 4     ->    ~36    fps
+ * 8     ->     60    fps
+ * 16    ->    ~00.63 fps
 
 Note that there is no \_\_shared\_\_ memory in the project, so the "tile width" consideration on slide
 93 of the CUDA introduction 2/2 deck is irrelevant. (Basically, the explanation for how block size
