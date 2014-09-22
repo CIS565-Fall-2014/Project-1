@@ -4,10 +4,7 @@ Project 1
 # Project 1 : Introduction to CUDA
 
 ## PERFORMANCE ANALYSIS
-* How does changing the tile and block sizes change performance? Why?
-* How does changing the number of planets change performance? Why?
-
-The following table shows the fps with different number of planets and block size.
+*The following table shows the fps with different number of planets and block size.
 --------------------------------------------------------
 | planets #|     Block Size=128    |  Block Size=256  | Block Size=512|
 |:---------:|:-----------------:|:-----------------:|:-----------:|
