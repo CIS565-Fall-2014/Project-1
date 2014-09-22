@@ -124,7 +124,7 @@ __global__ void updateS(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::
 {
     int i = threadIdx.x + (blockIdx.x * blockDim.x);
     vel[i] += dt * acc[i];
-    pos[i] += glm::vec4(dt * vel[i], 0);
+    pos[i] = glm::vec4(glm::vec3(pos[i]) + dt * vel[i], 1);
 }
 
 // Update the vertex buffer object
@@ -203,6 +203,7 @@ void initCuda(int N)
 // Using the functions you wrote above, write a function that calls the CUDA kernels to update a single sim step
 void cudaNBodyUpdateWrapper(float dt)
 {
+#if PERFTEST
     static bool uninit = true;
     static cudaEvent_t ev0;
     static cudaEvent_t ev1;
@@ -220,13 +221,21 @@ void cudaNBodyUpdateWrapper(float dt)
     if (b > 1024) {
         exit(0);
     }
+#else
+    static const int b = 64;
+#endif
 
     int g = ceil(float(numObjects)/float(b));
 
+#if PERFTEST
     cudaEventRecord(ev0, 0);
+#endif
     updateF<<<g, b>>>(numObjects, dt, dev_pos, dev_vel, dev_acc);
+#if PERFTEST
     cudaEventRecord(ev1, 0);
+#endif
     updateS<<<g, b>>>(numObjects, dt, dev_pos, dev_vel, dev_acc);
+#if PERFTEST
     cudaEventRecord(ev2, 0);
 
     static float tt01, tt12;
@@ -245,6 +254,7 @@ void cudaNBodyUpdateWrapper(float dt)
         b += 8;
         tt01 = tt12 = 0;
     }
+#endif
 }
 
 void cudaUpdateVBO(float * vbodptr, int width, int height)
