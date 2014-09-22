@@ -62,7 +62,7 @@ void runCuda()
     // execute the kernel
     cudaNBodyUpdateWrapper(DT);
 #if VISUALIZE == 1
-    cudaUpdatePBO(dptr, field_width, field_height);
+    //cudaUpdatePBO(dptr, field_width, field_height);
     cudaUpdateVBO(dptrvert, field_width, field_height);
 #endif
     // unmap buffer object

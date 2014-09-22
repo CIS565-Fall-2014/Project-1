@@ -118,3 +118,48 @@ describe the changes you make between experiments and how you are benchmarking.
 Please commit your changes to your forked version of the repository and open a
 pull request.  Please write your performance analysis in your README.md.
 Remember to email Harmony (harmoli+CIS565@seas.upenn.edu) your grade and why.
+
+## PERFORMANCE ANALYSIS
+
+### How does changing the tile and block sizes change performance? Why?
+
+The following estimates were obtained simulating 2500 objects.
+
+Number of threads per block | Number of blocks | Frame rate (fps) | Number of kernel calls | Number of wasted calls
+:---: | :---: | :---: | :---: | :---:
+1 | 2500 | 1.5 | 2500 | 0
+2 | 1250 | 3.0 | 3750 | 1250
+4 | 625 | 5.8 | 2500 | 0
+8 | 313 | 10.5 | 2504 | 4
+16 | 157 | 19.4 | 2512 | 12
+32 | 79 | 18.8 | 2528 | 28
+64 | 40 | 17.7 | 2560 | 60
+128 | 20 | 18.3 | 2560 | 60
+256 | 10 | 17.9 | 2560 | 60
+512 | 5 | 16.4 | 2560 | 60
+1024 | 3 | 15.9 | 3072 | 572
+
+Here, we can postulate two primary factors related to the grid and block sizes that directly influence program performance.
+
+First, it is important to have BOTH many blocks in the grid and many threads per block. It is not enough to have just many blocks (2500 blocks/1 thread per block) OR many threads per block (3 blocks/1024 threads per block). Doing so does not fully take advantage of CUDA's parallel nature. This assertion is supported by the fact that the largest frame rates were achieved by the tests that appear toward the middle of the above table where the disparity between number of blocks and number of threads per block was at its smallest.
+
+Second, we can observe and intuitively accept that wasted kernel calls will negatively impact performance. This phenomena is the result of the number of objects we wish to simulate not neatly fitting into the number of bocks allocated based on the number of threads we have specified per block. This observation is supported by the fact that the test with 16 threads per block outperformed later tests that called the kernel functions unnecessarily more often.
+
+### How does changing the number of planets change performance? Why?
+
+The following estimates were obtained using 128 threads per block.
+
+Number of planets | Frame rate (fps)
+:---: | :---:
+256 | 60.0
+512 | 60.0
+1024 | 60.0
+2048 | 25.9
+4096 | 6.4
+8192 | 1.7
+
+Increasing the number of planets decreases performance. To accurately compute an n-body simulation, the gravitational forces that all bodies apply to every other body must be computed. For each planet, I compute the acceleration of that planet by looping over every other planet in the system. So, for every planet added to the system, not only must an additional thread be launched to compute the forces for the new planet, but the size of the aforementioned loop to compute forces will increase for every planet in the system.
+
+### Without running experiments, how would you expect the serial and GPU verions of matrix_math to compare? Why?
+
+Without running tests, I would expect the running times of my serial and GPU versions of matrix operations to be nearly identical. First, the matrices used in this program are very small (5x5). Since there is a certain amount of overhead needed to setup the parallel environment and launch blocks of threads, the matrices would need to be much larger to makeup for this overhead in the parallel implementations. Second, even if the matrices were much larger, I am not convinced the parallel operations would vastly outperform their serial counterparts because, in my current implementation, I am executing every thread in a single block. As can be seen in the first table of this performance analysis, performance is not great when there exist many more threads than blocks.
