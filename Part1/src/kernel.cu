@@ -123,7 +123,7 @@ glm::vec3 accelerate( int N, glm::vec4 my_pos, glm::vec4 *their_pos )
 
 	glm::vec3 acceleration( 0.0f, 0.0f, 0.0f );
 
-	// Compute acceleration casued by the star at the center of the "solar system".
+	// Compute acceleration caused by the star at the center of the "solar system".
 	acceleration += computeGravitationalAccelerationBetweenTwoBodies( my_pos, glm::vec4( 0.0f, 0.0f, 0.0f, starMass ) );
 
 	// Compute acceleration caused by the other N-1 planets.
