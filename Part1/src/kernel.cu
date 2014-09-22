@@ -217,14 +217,31 @@ void cudaNBodyUpdateWrapper(float dt)
 {
     dim3 fullBlocksPerGrid((int)ceil(float(numObjects)/float(blockSize)));
 
+	// Add events for profiling
+	cudaEvent_t beginEvent;
+	cudaEvent_t endEvent;
+	cudaEventCreate( &beginEvent );
+	cudaEventCreate( &endEvent );
+
 	// Compute accelerations from current positions
+	cudaEventRecord(beginEvent, 0);
 	updateF<<<fullBlocksPerGrid, blockSize>>>(numObjects, dev_pos, dev_acc);
+	cudaEventRecord(endEvent, 0);
+	cudaEventSynchronize(endEvent);
+	float timeValue;
+	cudaEventElapsedTime(&timeValue, beginEvent, endEvent);
+	fprintf(stdout, "updateF kernel time: %f.\n", timeValue); 
 
 	// Wait for all accelerations to be updated
 	cudaThreadSynchronize();
 
 	// Update all positions and velocities from integrating the new acceleration
+	cudaEventRecord(beginEvent, 0);
 	updateS<<<fullBlocksPerGrid, blockSize>>>(numObjects, dt, dev_pos, dev_vel, dev_acc);
+	cudaEventRecord(endEvent, 0);
+	cudaEventSynchronize(endEvent);
+	cudaEventElapsedTime(&timeValue, beginEvent, endEvent);
+	fprintf(stdout, "updateS kernel time: %f.\n", timeValue); 
 
 	// Wait for all positions to be updated
 	cudaThreadSynchronize();

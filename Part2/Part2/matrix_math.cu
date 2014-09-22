@@ -131,35 +131,72 @@ int main(int argc, char** argv) {
 
 	dim3 dimBlock(N,N);
 
-	fprintf(stdout, "GPU: \n");
+	// Add events for profiling
+	cudaEvent_t beginEvent;
+	cudaEvent_t endEvent;
+	cudaEventCreate( &beginEvent );
+	cudaEventCreate( &endEvent );
+	float timeValue;
+
+	//fprintf(stdout, "GPU: \n");
 
 	// Do matrix addition on the GPU and see the result
+	cudaEventRecord(beginEvent, 0);
 	mat_add<<<1,dimBlock>>>(mat_1d, mat_2d, mat_3d);
 	cudaThreadSynchronize();
+	cudaEventRecord(endEvent, 0);
+	cudaEventSynchronize(endEvent);
+	cudaEventElapsedTime(&timeValue, beginEvent, endEvent);
+	fprintf(stdout, "GPU mat_add kernel time: %f.\n", timeValue); 
 	printResultsGPU(mat_3d);
 
 	// Do matrix subtraction on the GPU and see the result
+	cudaEventRecord(beginEvent, 0);
 	mat_sub<<<1,dimBlock>>>(mat_1d, mat_2d, mat_3d);
 	cudaThreadSynchronize();
+	cudaEventRecord(endEvent, 0);
+	cudaEventSynchronize(endEvent);
+	cudaEventElapsedTime(&timeValue, beginEvent, endEvent);
+	fprintf(stdout, "GPU mat_sub kernel time: %f.\n", timeValue); 
 	printResultsGPU(mat_3d);
 
 	// Do matrix multiplication on the GPU and see the result
+	cudaEventRecord(beginEvent, 0);
 	mat_mult<<<1,dimBlock>>>(mat_1d, mat_2d, mat_3d);
 	cudaThreadSynchronize();
+	cudaEventRecord(endEvent, 0);
+	cudaEventSynchronize(endEvent);
+	cudaEventElapsedTime(&timeValue, beginEvent, endEvent);
+	fprintf(stdout, "GPU mat_mult kernel time: %f.\n", timeValue); 
 	printResultsGPU(mat_3d);
 
-	fprintf(stdout, "CPU: \n");
+	//fprintf(stdout, "CPU: \n");
 
 	// Do matrix addition on the CPU and see the result
+	cudaEventRecord(beginEvent, 0);
 	mat_add_cpu(mat_1, mat_2, mat_3);
+	cudaEventRecord(endEvent, 0);
+	cudaEventSynchronize(endEvent);
+	cudaEventElapsedTime(&timeValue, beginEvent, endEvent);
+	fprintf(stdout, "CPU mat_add kernel time: %f.\n", timeValue); 
 	printResults(mat_3);
 
 	// Do matrix subtraction on the CPU and see the result
+	cudaEventRecord(beginEvent, 0);
 	mat_sub_cpu(mat_1, mat_2, mat_3);
+	cudaEventRecord(endEvent, 0);
+	cudaEventSynchronize(endEvent);
+	cudaEventElapsedTime(&timeValue, beginEvent, endEvent);
+	fprintf(stdout, "CPU mat_sub kernel time: %f.\n", timeValue); 
 	printResults(mat_3);
 
 	// Do matrix multiplication on the CPU and see the result
+	cudaEventRecord(beginEvent, 0);
 	mat_mult_cpu(mat_1, mat_2, mat_3);
+	cudaEventRecord(endEvent, 0);
+	cudaEventSynchronize(endEvent);
+	cudaEventElapsedTime(&timeValue, beginEvent, endEvent);
+	fprintf(stdout, "CPU mat_mult kernel time: %f.\n", timeValue); 
 	printResults(mat_3);
 
 	cleanUp();
