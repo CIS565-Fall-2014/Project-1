@@ -2,8 +2,7 @@
 Project 1
 =========
 # PERFORMANCE ANALYSIS
-=========
-*The following table shows the fps with different number of planets and block size.
+The following table shows the fps with different number of planets and block size.
 --------------------------------------------------------
 | planets #|     Block Size=128    |  Block Size=256  | Block Size=512|
 |:---------:|:-----------------:|:-----------------:|:-----------:|
