@@ -1,10 +1,12 @@
+
 Project 1
 =========
 #Jianqiao Li
 # Project 1 : Introduction to CUDA
 
 ## PERFORMANCE ANALYSIS
-*The following table shows the fps with different number of planets and block size.
+
+The following table shows the fps with different number of planets and block size.
 --------------------------------------------------------
 | planets #|     Block Size=128    |  Block Size=256  | Block Size=512|
 |:---------:|:-----------------:|:-----------------:|:-----------:|
