@@ -108,7 +108,7 @@ bool test_impl(
     void (*cpu)(float *, float *, float *))
 {
     // Calculate grid/block sizes
-    dim3 dimGrid(DIM, DIM);
+    dim3 dimGrid(1, 1);
     dim3 dimBlock(DIM, DIM);
 
     // Run on GPU
@@ -173,7 +173,7 @@ int main()
 
     // Initialize host/device matrices
     for (int i = 0; i < COUNT; ++i) {
-        hst_A[i] = i;
+        hst_A[i] = (float) i;
     }
     cudaMemcpy(dev_A, hst_A, COUNT * sizeof(*dev_A), cudaMemcpyHostToDevice);
 
