@@ -230,6 +230,7 @@ void cudaNBodyUpdateWrapper(float dt)
 	// FILL IN HERE
 	dim3 fullBlocksPerGrid((int)ceil(float(numObjects)/float(blockSize)));
 	updateF<<<fullBlocksPerGrid, blockSize>>>(numObjects,dt,dev_pos,dev_vel,dev_acc);
+	cudaThreadSynchronize();
 	updateS<<<fullBlocksPerGrid, blockSize>>>(numObjects,dt,dev_pos,dev_vel,dev_acc);
 	cudaThreadSynchronize();
 }

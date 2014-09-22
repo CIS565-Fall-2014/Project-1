@@ -4,7 +4,7 @@
 
 #include "main.h"
 
-#define N_FOR_VIS 5000
+#define N_FOR_VIS 4800
 #define DT 0.2
 #define VISUALIZE 1
 //-------------------------------
@@ -72,11 +72,12 @@ void runCuda()
 
 int timebase = 0;
 int frame = 0;
-
+int allframe=0;
 void display()
 {
     static float fps = 0;
     frame++;
+	allframe++;
     int time=glutGet(GLUT_ELAPSED_TIME);
 
     if (time - timebase > 1000) {
@@ -84,10 +85,11 @@ void display()
         timebase = time;
         frame = 0;
     }
+	float avrfps=allframe*1000.0f/time;
     runCuda();
 
     char title[100];
-    sprintf( title, "565 NBody sim [%0.2f fps]", fps );
+    sprintf( title, "565 NBody sim [%0.2f fps] [%0.2f avrfps]", fps,avrfps);
     glutSetWindowTitle(title);
 
     glBindBuffer( GL_PIXEL_UNPACK_BUFFER, pbo);
