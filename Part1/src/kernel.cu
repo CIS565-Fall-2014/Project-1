@@ -106,8 +106,9 @@ __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 __device__ glm::vec3 universalForce(glm::vec4 pos1,glm::vec4 pos2)
 {
 	glm::vec3 dir = glm::vec3(pos2) - glm::vec3(pos1);
-	float r = glm::length(dir) + 0.00001f;
-
+	float r = glm::length(dir);
+	//to prevent two planets getting too close and blow up the force
+	if(r<1.0f) return glm::vec3(0.0f);
 	glm::vec3 F =(float) G * dir *pos2.w /(r*r*r);
 	return F;
 }

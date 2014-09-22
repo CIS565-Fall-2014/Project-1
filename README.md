@@ -16,6 +16,7 @@ and since no shared memory or register was utilized, there was no difference in 
 
 * How does changing the number of planets change performance? Why?
 
+(without removing sendToPBO())
 numPlanets: 5000   2500   1250   600   300   150
        FPS: 1.43   2.84   5.64   11.6  22.6  43.01
 
@@ -32,7 +33,4 @@ in parallel leaving us a O(N) on numPlanets.
 I expect the GPU version has O(N) on dimension of the input matrix but O(N^3) for the CPU version because the two 
 outer loops in the GPU version was done in parallel.
 
-## SUBMISSION
-Please commit your changes to your forked version of the repository and open a
-pull request.  Please write your performance analysis in your README.md.
-Remember to email Harmony (harmoli+CIS565@seas.upenn.edu) your grade and why.
+
