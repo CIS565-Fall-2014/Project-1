@@ -9,8 +9,8 @@
 dim3 threadsPerBlock(blockSize);
 
 int numObjects;
-const float planetMass = 3e8;
 const __device__ float starMass = 5e10;
+const __device__ float planetMass = 3e8;
 
 const float scene_scale = 2e2; //size of the height map in simulation space
 
@@ -89,19 +89,37 @@ __global__ void generateCircularVelArray(int time, int N, glm::vec3 * arr, glm::
 //		 REMEMBER : F = (G * m_a * m_b) / (r_ab ^ 2)
 __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 {
-    return glm::vec3(0.0f);
+	glm::vec3 delta_acc (0.f);
+	float dist_from_star = sqrt(my_pos.x * my_pos.x + my_pos.y * my_pos.y + my_pos.z * my_pos.z);
+	if (dist_from_star > 1) {
+		delta_acc += (float)(G * starMass) / pow(dist_from_star, 3) * (-glm::vec3(my_pos));
+	}
+	for (int i = 0; i < N; i++) {
+		//glm::vec3 their_pos_3d (their_pos[i]);
+		glm::vec3 R (their_pos[i] - my_pos);
+		float dist = sqrt(R.x * R.x + R.y * R.y + R.z * R.z);
+		if (dist > 1) {
+			delta_acc += (float)(G * planetMass) / pow(dist, 3) * R;
+		}
+	}
+	
+    return delta_acc;
 }
 
 // TODO : update the acceleration of each body
 __global__ void updateF(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
-	// FILL IN HERE
+	int index = threadIdx.x + (blockIdx.x * blockDim.x);
+	acc[index] = accelerate(N, pos[index], pos);
 }
 
 // TODO : update velocity and position using a simple Euler integration scheme
 __global__ void updateS(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
 	// FILL IN HERE
+    int index = threadIdx.x + (blockIdx.x * blockDim.x);
+	pos[index] += glm::vec4(dt * vel[index],0);
+	vel[index] += dt * acc[index];
 }
 
 // Update the vertex buffer object
@@ -180,6 +198,11 @@ void initCuda(int N)
 void cudaNBodyUpdateWrapper(float dt)
 {
 	// FILL IN HERE
+	dim3 fullBlocksPerGrid((int)ceil(float(numObjects)/float(blockSize)));
+	updateF<<<fullBlocksPerGrid, blockSize>>>(numObjects, dt, dev_pos, dev_vel, dev_acc);
+    cudaThreadSynchronize();
+	updateS<<<fullBlocksPerGrid, blockSize>>>(numObjects, dt, dev_pos, dev_vel, dev_acc);
+    cudaThreadSynchronize();
 }
 
 void cudaUpdateVBO(float * vbodptr, int width, int height)
