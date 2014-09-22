@@ -69,7 +69,34 @@ and 1024 being the max.
 
 I assume that the increase in performance from 1-9 is because having more threads in a block allows the GPU
 to schedule them to run at the same time. Perhaps performance falls off a cliff at 10 because something
-about the architecture of an NVS 310 
+about the architecture of an NVS 310 means that the 10th thread is scheduled after the others have run in parallel,
+resulting in a situation with very unsaturated hardware. (This also explains why performance slowly
+improves as blockSize increases from 10, since there are more threads scheduled on a "reschedule".
+
+#### Effects of number of particles (N_FOR_VIS)
+
+I will not be making a table to explain this because it is very intuitive and I'd really like to get some
+sleep now. The performance gets better as the number of planets decreases, because this means there is
+a smaller workload for the GPU to chug through on each sim step.
+
+#### Effects of changing DT with N_FOR_VIS at 2500 and blockSize at 9
+
+ * baseline DT = 0.2 -> 12 fps
+ * other values      -> 12 fps
+
+The idea here is that DT is only involved in the "time multiplier" of the simulation, but does not
+have much effect on calculation efficiency. The planets look like they move much slower for 0.02 and
+much faster for 5, for example, but the performance in fps is always the same.
+
+#### matrix_math CPU vs GPU
+
+The serial version is like having 1 person do all the work, so I'd expect it to take around 25x longer
+than the GPU version, assuming that basic ALU operations on the CPU and GPU run at the same speed.
+With the GPU version, it's like having an army of people available to do the work, but the action of
+adding / subtracting / calculating a dot product is atomic and must be done in full by one person only.
+So you can take 25 people from the army and have them each calculate one piece of the 5x5 matrix.
+
+
 
 Note that there is no \_\_shared\_\_ memory in the project, so the "tile width" consideration on slide
 93 of the CUDA introduction 2/2 deck is irrelevant. (Basically, the explanation for how block size
