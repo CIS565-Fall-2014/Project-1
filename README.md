@@ -30,6 +30,10 @@ of planets for comparability). Note the following:
   when the block size passes _N_/4 (and a smaller one at _N_/8). These are
   major points where the number of blocks decreases by one.
 
+(These graphs are made by changing the block size as the simulation runs; while
+this may not be totally accurate since the data is different every frame,
+hand-comparing a bunch of values seemed to indicate that it was very close.)
+
 ### Performance predictions: matrix_math
 
 * Without running experiments, how would you expect the serial and GPU verions
