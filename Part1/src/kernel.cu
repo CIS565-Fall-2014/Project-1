@@ -89,19 +89,56 @@ __global__ void generateCircularVelArray(int time, int N, glm::vec3 * arr, glm::
 //		 REMEMBER : F = (G * m_a * m_b) / (r_ab ^ 2)
 __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 {
-    return glm::vec3(0.0f);
+	glm::vec3 acc(0.0f);
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+    if(index < N)
+    {
+		for (int i = 0; i < their_pos->length(); i++)
+		{
+			glm::vec4 r4 = their_pos[i] - my_pos;
+			glm::vec3 r(r4.x, r4.y, r4.z);
+			float s = (G * their_pos[i].w / pow(pow(glm::length(r),2) + pow(ZERO_ABSORPTION_EPSILON,2), 1.5));
+			acc[0] += s * r.x;
+			acc[1] += s * r.y;
+			acc[2] += s * r.z;
+		}
+		glm::vec3 starR(-my_pos.x, -my_pos.y, -my_pos.z);
+		float starS = (G * starMass / pow(pow(glm::length(starR),2) + pow(ZERO_ABSORPTION_EPSILON,2), 1.5));
+		acc[0] += starS * starR.x;
+		acc[1] += starS * starR.y;
+		acc[2] += starS * starR.z;
+	}
+    return acc;
 }
 
 // TODO : update the acceleration of each body
 __global__ void updateF(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
 	// FILL IN HERE
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+    if(index < N)
+    {
+		acc[index] = accelerate(N, pos[index], pos);
+	}
 }
 
 // TODO : update velocity and position using a simple Euler integration scheme
 __global__ void updateS(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
 	// FILL IN HERE
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+    if(index < N)
+    {
+		glm::vec3 vt = vel[index] + acc[index] * dt;
+		glm::vec3 p(pos[index].x, pos[index].y, pos[index].z);
+		p += (vel[index] + vt) * dt / 2.0f;
+		pos[index].x = p.x;
+		pos[index].y = p.y;
+		pos[index].z = p.z;
+		vel[index].x = vt.x;
+		vel[index].y = vt.y;
+		vel[index].z = vt.z;
+	}
 }
 
 // Update the vertex buffer object
@@ -180,6 +217,10 @@ void initCuda(int N)
 void cudaNBodyUpdateWrapper(float dt)
 {
 	// FILL IN HERE
+	updateF<<< blockSize, threadsPerBlock >>>(numObjects, dt, dev_pos, dev_vel, dev_acc);
+	cudaThreadSynchronize();
+	updateS<<< blockSize, threadsPerBlock >>>(numObjects, dt, dev_pos, dev_vel, dev_acc);
+	cudaThreadSynchronize();
 }
 
 void cudaUpdateVBO(float * vbodptr, int width, int height)
