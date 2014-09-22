@@ -27,8 +27,9 @@ void checkCUDAError(const char *msg, int line = -1)
         {
             fprintf(stderr, "Line %d: ", line);
         }
-        fprintf(stderr, "Cuda error: %s: %s.\n", msg, cudaGetErrorString( err) ); 
-        exit(EXIT_FAILURE); 
+        fprintf(stderr, "Cuda error: %s: %s.\n", msg, cudaGetErrorString( err) );
+
+        exit(EXIT_FAILURE);
     }
 } 
 
@@ -83,25 +84,105 @@ __global__ void generateCircularVelArray(int time, int N, glm::vec3 * arr, glm::
     }
 }
 
+// Helper function for accelerate().
+// Compute the gravitational acceleration body2 imposes on body1.
+__device__
+glm::vec3 computeGravitationalAccelerationBetweenTwoBodies( glm::vec4 body1, glm::vec4 body2 )
+{
+	// NOTE: F = (G * m_a * m_b) / (r_ab ^ 2)
+	//		 F = ma => a = F / m.
+	//		 So, a = (G * m_a * m_b) / (m_a * r_ab ^ 2) => a = (G * m_b) / (r_ab ^ 2)
+
+	// NOTE: The the 4th component (w) of each body is that body's mass.
+
+	glm::vec3 r( body2.x - body1.x, body2.y - body1.y, body2.z - body1.z );
+
+	// If two bodies have identical positions, immediately return a force of 0 to avoid dividing by 0.
+	//if ( glm::length( r ) < EPSILON ) {
+	if ( glm::length( r ) < 0.1f ) {
+		return glm::vec3( 0.0f, 0.0f, 0.0f );
+	}
+
+	float numerator = ( float )( G * body2.w );
+	float denominator = ( float )( glm::length( r ) * glm::length( r ) );
+
+	return ( numerator / denominator ) * glm::normalize( r );
+}
+
 // TODO: Core force calc kernel global memory
 //		 HINT : You may want to write a helper function that will help you 
 //              calculate the acceleration contribution of a single body.
 //		 REMEMBER : F = (G * m_a * m_b) / (r_ab ^ 2)
-__device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
+// N: Number of planets.
+// my_pos: Position of current planet.
+// their_pos: Array of planet positions.
+__device__
+glm::vec3 accelerate( int N, glm::vec4 my_pos, glm::vec4 *their_pos )
 {
-    return glm::vec3(0.0f);
+	// Danny was here.
+
+	glm::vec3 acceleration( 0.0f, 0.0f, 0.0f );
+
+	// Compute acceleration casued by the star at the center of the "solar system".
+	acceleration += computeGravitationalAccelerationBetweenTwoBodies( my_pos, glm::vec4( 0.0f, 0.0f, 0.0f, starMass ) );
+
+	// Compute acceleration caused by the other N-1 planets.
+	for ( unsigned int i = 0; i < N; ++i ) {
+		acceleration += computeGravitationalAccelerationBetweenTwoBodies( my_pos, their_pos[i] );
+	}
+
+	return acceleration;
 }
 
 // TODO : update the acceleration of each body
-__global__ void updateF(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
+// N: Number of planets.
+// dt: Time step.
+// pos: Array of planet positions.
+// vel: Array of planet velocities.
+// acc: array of planet accelerations.
+__global__
+void updateF( int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc )
 {
-	// FILL IN HERE
+	// Danny was here.
+
+	// NOTE: Blocks are a one-dimensional array in the grid (they only have an x-component).
+	// NOTE: Threads are a one dimensional array in the current block (they only have an x-component).
+
+	int planet_index = threadIdx.x + ( blockIdx.x * blockDim.x );
+
+	// If number of planets do not fit perfectly inside the number of blocks specified,
+	// then some thread indices will not correlate to a planet, so check bounds.
+	if ( planet_index < N ) {
+		acc[planet_index] = accelerate( N, pos[planet_index], pos );
+	}
 }
 
 // TODO : update velocity and position using a simple Euler integration scheme
-__global__ void updateS(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
+// N: Number of planets.
+// dt: Time step.
+// pos: Array of planet positions.
+// vel: Array of planet velocities.
+// acc: array of planet accelerations.
+__global__
+void updateS( int N, float dt, glm::vec4 *pos, glm::vec3 *vel, glm::vec3 *acc )
 {
-	// FILL IN HERE
+	// Danny was here.
+
+	// NOTE: Blocks are a one-dimensional array in the grid (they only have an x-component).
+	// NOTE: Threads are a one dimensional array in the current block (they only have an x-component).
+
+	int planet_index = threadIdx.x + ( blockIdx.x * blockDim.x );
+
+	// If number of planets do not fit perfectly inside the number of blocks specified,
+	// then some thread indices will not correlate to a planet, so check bounds.
+	if ( planet_index < N ) {
+		vel[planet_index] += ( acc[planet_index] * dt );
+
+		// Must separate into x-, y-, and z-components since pos is an array of glm::vec4s while vel is an array of glm::vec3s.
+		pos[planet_index].x += ( vel[planet_index].x * dt );
+		pos[planet_index].y += ( vel[planet_index].y * dt );
+		pos[planet_index].z += ( vel[planet_index].z * dt );
+	}
 }
 
 // Update the vertex buffer object
@@ -179,7 +260,21 @@ void initCuda(int N)
 // TODO : Using the functions you wrote above, write a function that calls the CUDA kernels to update a single sim step
 void cudaNBodyUpdateWrapper(float dt)
 {
-	// FILL IN HERE
+	// Danny was here.
+
+	// Compute grid dimensions to pass into kernel.
+	// Block dimensions are already given in threadsPerBlock.
+	dim3 blocks_per_grid( ( int )ceil( ( float )numObjects / ( float )blockSize ) );
+
+	// dev_pos, dev_vel, and dev_acc are arrays of vectors that have already been allocated on the device.
+	updateF<<<blocks_per_grid, threadsPerBlock>>>( numObjects, dt, dev_pos, dev_vel, dev_acc );
+	checkCUDAErrorWithLine("Kernel failed!"); // Because initCuda() does this.
+
+	// dev_pos, dev_vel, and dev_acc are arrays of vectors that have already been allocated on the device.
+	updateS<<<blocks_per_grid, threadsPerBlock>>>(numObjects, dt, dev_pos, dev_vel, dev_acc);
+	checkCUDAErrorWithLine("Kernel failed!"); // Because initCuda() does this.
+
+	cudaThreadSynchronize(); // Because cudaThreadSynchronize() and cudaUpdatePBO() do this.
 }
 
 void cudaUpdateVBO(float * vbodptr, int width, int height)
@@ -195,5 +290,3 @@ void cudaUpdatePBO(float4 * pbodptr, int width, int height)
     sendToPBO<<<fullBlocksPerGrid, blockSize, blockSize*sizeof(glm::vec4)>>>(numObjects, dev_pos, pbodptr, width, height, scene_scale);
     cudaThreadSynchronize();
 }
-
-
