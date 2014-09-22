@@ -125,19 +125,19 @@ Remember to email Harmony (harmoli+CIS565@seas.upenn.edu) your grade and why.
 
 The following estimates were obtained simulating 2500 objects.
 
-Number of threads per block | Number of blocks | Frame rate | Number of kernel calls | Number of wasted calls
-:---: | :---: | :---: | :---: | :---: | :---:
-1 | x | x | x | x | x
-2 | x | x | x | x | x
-4 | x | x | x | x | x
-8 | x | x | x | x | x
-16 | x | x | x | x | x
-32 | x | x | x | x | x
-64 | x | x | x | x | x
-128 | x | x | x | x | x
-256 | x | x | x | x | x
-512 | x | x | x | x | x
-1024 | x | x | x | x | x
+Number of threads per block | Number of blocks | Frame rate (fps) | Number of kernel calls | Number of wasted calls
+:---: | :---: | :---: | :---: | :---:
+1 | 2500 | 1.5 | 2500 | 0
+2 | 1250 | 3.0 | 3750 | 1250
+4 | 625 | 5.8 | 2500 | 0
+8 | 313 | 10.5 | 2504 | 4
+16 | 157 | 19.4 | 2512 | 12
+32 | 79 | 18.8 | 2528 | 28
+64 | 40 | 17.7 | 2560 | 60
+128 | 20 | 18.3 | 2560 | 60
+256 | 10 | 17.9 | 2560 | 60
+512 | 5 | 16.4 | 2560 | 60
+1024 | 3 | 15.9 | 3072 | 572
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget nisi ut odio placerat imperdiet. Donec aliquet neque odio, in tempus erat mollis lobortis. Fusce ut gravida diam, et aliquam lacus. Cras suscipit ipsum quis dolor lacinia, et tempus libero accumsan. Sed nisi nisl, ornare at ipsum sit amet, facilisis viverra risus. Integer iaculis turpis ac nunc blandit, ut viverra erat volutpat. Curabitur porttitor arcu at quam rhoncus, ut gravida neque lacinia. Nunc vitae sem maximus, ultrices erat vel, pretium erat.
 
