@@ -139,12 +139,27 @@ Number of threads per block | Number of blocks | Frame rate (fps) | Number of ke
 512 | 5 | 16.4 | 2560 | 60
 1024 | 3 | 15.9 | 3072 | 572
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget nisi ut odio placerat imperdiet. Donec aliquet neque odio, in tempus erat mollis lobortis. Fusce ut gravida diam, et aliquam lacus. Cras suscipit ipsum quis dolor lacinia, et tempus libero accumsan. Sed nisi nisl, ornare at ipsum sit amet, facilisis viverra risus. Integer iaculis turpis ac nunc blandit, ut viverra erat volutpat. Curabitur porttitor arcu at quam rhoncus, ut gravida neque lacinia. Nunc vitae sem maximus, ultrices erat vel, pretium erat.
+Here, we can postulate two primary factors related to the grid and block sizes that directly influence program performance.
+
+First, it is important to have BOTH many blocks in the grid and many threads per block. It is not enough to have just many blocks (2500 blocks/1 thread per block) OR many threads per block (3 blocks/1024 threads per block). Doing so does not fully take advantage of CUDA's parallel nature. This assertion is supported by the fact that the largest frame rates were achieved by the tests that appear toward the middle of the above table where the disparity between number of blocks and number of threads per block was at its smallest.
+
+Second, we can observe and intuitively accept that wasted kernel calls will negatively impact performance. This phenomena is the result of the number of objects we wish to simulate not neatly fitting into the number of bocks allocated based on the number of threads we have specified per block. This observation is supported by the fact that the test with 16 threads per block outperformed later tests that called the kernel functions unnecessarily more often.
 
 ### How does changing the number of planets change performance? Why?
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget nisi ut odio placerat imperdiet. Donec aliquet neque odio, in tempus erat mollis lobortis. Fusce ut gravida diam, et aliquam lacus. Cras suscipit ipsum quis dolor lacinia, et tempus libero accumsan. Sed nisi nisl, ornare at ipsum sit amet, facilisis viverra risus. Integer iaculis turpis ac nunc blandit, ut viverra erat volutpat. Curabitur porttitor arcu at quam rhoncus, ut gravida neque lacinia. Nunc vitae sem maximus, ultrices erat vel, pretium erat.
+The following estimates were obtained using 128 threads per block.
+
+Number of planets | Frame rate (fps)
+:---: | :---:
+256 | 60.0
+512 | 60.0
+1024 | 60.0
+2048 | 25.9
+4096 | 6.4
+8192 | 1.7
+
+Increasing the number of planets decreases performance. To accurately compute an n-body simulation, the gravitational forces that all bodies apply to every other body must be computed. For each planet, I compute the acceleration of that planet by looping over every other planet in the system. So, for every planet added to the system, not only must an additional thread be launched to compute the forces for the new planet, but the size of the aforementioned loop to compute forces will increase for every planet in the system.
 
 ### Without running experiments, how would you expect the serial and GPU verions of matrix_math to compare? Why?
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget nisi ut odio placerat imperdiet. Donec aliquet neque odio, in tempus erat mollis lobortis. Fusce ut gravida diam, et aliquam lacus. Cras suscipit ipsum quis dolor lacinia, et tempus libero accumsan. Sed nisi nisl, ornare at ipsum sit amet, facilisis viverra risus. Integer iaculis turpis ac nunc blandit, ut viverra erat volutpat. Curabitur porttitor arcu at quam rhoncus, ut gravida neque lacinia. Nunc vitae sem maximus, ultrices erat vel, pretium erat.
+Without running tests, I would expect the running times of my serial and GPU versions of matrix operations to be nearly identical. First, the matrices used in this program are very small (5x5). Since there is a certain amount of overhead needed to setup the parallel environment and launch blocks of threads, the matrices would need to be much larger to makeup for this overhead in the parallel implementations. Second, even if the matrices were much larger, I am not convinced the parallel operations would vastly outperform their serial counterparts because, in my current implementation, I am executing every thread in a single block. As can be seen in the first table of this performance analysis, performance is not great when there exist many more threads than blocks.
