@@ -13,7 +13,10 @@
 
 // forward declare CPU helper method to display results
 void printResults(float*, char*);
-
+// and the serial versions of stuff
+void cpu_mat_add (float*, float*, float*);
+void cpu_mat_sub (float*, float*, float*);
+void cpu_mat_mult (float*, float*, float*);
 
 // kernels to run on GPU
 __global__ void mat_add(float* Md, float* Nd, float* Pd) {
@@ -143,7 +146,13 @@ int main(int argc, char** argv) {
 	//	std::cout << M[i] << std::endl;
 	//}
 
-
+	// print out serial results
+	cpu_mat_add(P, M, N);
+	printResults(P, "SERIAL ADD");
+	cpu_mat_sub(P, M, N);
+	printResults(P, "SERIAL SUBTRACT");
+	cpu_mat_mult(P, M, N);
+	printResults(P, "SERIAL MULTIPLY");
 
 
 	std::cin.ignore();
@@ -160,5 +169,40 @@ void printResults (float* R, char* message) {
 			std::cout << R[index] << '\t';
 		}
 		std::cout << std::endl;
+	}
+}
+
+//serial versions
+void cpu_mat_add (float* R, float* M, float* N) {
+	for (int i = 0; i < MAT_WIDTH; i++) {
+		for (int j = 0; j < MAT_WIDTH; j++) {
+			int index = i*MAT_WIDTH + j;
+			R[index] = M[index] + N[index];
+		}
+	}
+}
+
+void cpu_mat_sub (float* R, float* M, float* N) {
+	for (int i = 0; i < MAT_WIDTH; i++) {
+		for (int j = 0; j < MAT_WIDTH; j++) {
+			int index = i*MAT_WIDTH + j;
+			R[index] = M[index] - N[index];
+		}
+	}
+}
+
+void cpu_mat_mult (float* R, float* M, float* N) {
+	for (int i = 0; i < MAT_WIDTH; i++) {
+		for (int j = 0; j < MAT_WIDTH; j++) {
+			int index = i*MAT_WIDTH + j;
+			
+			float runningSum = 0.f;
+			
+			for (int k = 0; k < MAT_WIDTH; k++) {
+				runningSum += M[i*MAT_WIDTH + k] * N[k*MAT_WIDTH + j];
+			}
+			
+			R[index] = runningSum;
+		}
 	}
 }
