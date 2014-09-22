@@ -1,0 +1,10 @@
+PART I:
+For the N-body Simulation, although in my assumption, the results should be varied like this:
+
+Keep N unchanged, if blocksize increases, then the fps will increases; and vice versa;
+Keep blocksize unchanged, if N increases, the fps will decreases, and vice versa.
+
+However, in my program, no matter how I changed the variable values (excluding the situations that had made the program crashed), the fps stayed the same at around 59.98fps.
+
+PART II:
+For the math matrix part, the function running on GPU should be more efficient on both time and space. Because on GPU, data can be stored, transferred and running parallelly on different blocks, which improved the efficiency on both memory usage and running time. 
