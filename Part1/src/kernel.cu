@@ -83,25 +83,61 @@ __global__ void generateCircularVelArray(int time, int N, glm::vec3 * arr, glm::
     }
 }
 
-// TODO: Core force calc kernel global memory
+// Core force calc kernel global memory
 //		 HINT : You may want to write a helper function that will help you 
 //              calculate the acceleration contribution of a single body.
 //		 REMEMBER : F = (G * m_a * m_b) / (r_ab ^ 2)
 __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 {
-    return glm::vec3(0.0f);
+	// Get the index for this body
+    int index = threadIdx.x + (blockIdx.x * blockDim.x);
+
+	// Initialize the output vector
+	glm::vec3 F = glm::vec3(0.0f, 0.0f, 0.0f);
+
+	// Loop through and add contributions from each other body
+	for (size_t i = 0; i < N; i++) {
+		// Skip the current body since it doesn't apply a force to itself
+		if (i == index) {
+			continue;
+		}
+
+		glm::vec4 diff = their_pos[i] - my_pos;
+		glm::vec3 r = glm::vec3(diff);
+		float mag = G * their_pos[i].w / (glm::length(r) * glm::length(r));
+		F += mag * r / glm::length(r);
+	}
+
+	// Add the contribution from the star
+	glm::vec3 r = glm::vec3(my_pos);
+	float mag = G * starMass / (glm::length(r) * glm::length(r));
+	F -= mag * r / glm::length(r);
+
+    return F;
 }
 
-// TODO : update the acceleration of each body
-__global__ void updateF(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
+// update the acceleration of each body
+__global__ void updateF(int N, glm::vec4 * pos, glm::vec3 * acc)
 {
-	// FILL IN HERE
+	// Get the index for this body
+    int index = threadIdx.x + (blockIdx.x * blockDim.x);
+
+	// Calculate the acceleration on the body
+	acc[index] = accelerate(N, pos[index], pos); 
 }
 
-// TODO : update velocity and position using a simple Euler integration scheme
+// update velocity and position using a simple Euler integration scheme
 __global__ void updateS(int N, float dt, glm::vec4 * pos, glm::vec3 * vel, glm::vec3 * acc)
 {
-	// FILL IN HERE
+	// Get the index for this body
+    int index = threadIdx.x + (blockIdx.x * blockDim.x);
+
+	// Update the velocity through euler integration
+	vel[index] += dt * acc[index];
+
+	// Update the position
+	glm::vec4 v(vel[index], 0.0);
+	pos[index] += dt * v;
 }
 
 // Update the vertex buffer object
@@ -176,10 +212,39 @@ void initCuda(int N)
 	cudaThreadSynchronize();
 }
 
-// TODO : Using the functions you wrote above, write a function that calls the CUDA kernels to update a single sim step
+// Call the CUDA kernels updateF and updateS to update a single sim step
 void cudaNBodyUpdateWrapper(float dt)
 {
-	// FILL IN HERE
+    dim3 fullBlocksPerGrid((int)ceil(float(numObjects)/float(blockSize)));
+
+	// Add events for profiling
+	cudaEvent_t beginEvent;
+	cudaEvent_t endEvent;
+	cudaEventCreate( &beginEvent );
+	cudaEventCreate( &endEvent );
+
+	// Compute accelerations from current positions
+	cudaEventRecord(beginEvent, 0);
+	updateF<<<fullBlocksPerGrid, blockSize>>>(numObjects, dev_pos, dev_acc);
+	cudaEventRecord(endEvent, 0);
+	cudaEventSynchronize(endEvent);
+	float timeValue;
+	cudaEventElapsedTime(&timeValue, beginEvent, endEvent);
+	fprintf(stdout, "updateF kernel time: %f.\n", timeValue); 
+
+	// Wait for all accelerations to be updated
+	cudaThreadSynchronize();
+
+	// Update all positions and velocities from integrating the new acceleration
+	cudaEventRecord(beginEvent, 0);
+	updateS<<<fullBlocksPerGrid, blockSize>>>(numObjects, dt, dev_pos, dev_vel, dev_acc);
+	cudaEventRecord(endEvent, 0);
+	cudaEventSynchronize(endEvent);
+	cudaEventElapsedTime(&timeValue, beginEvent, endEvent);
+	fprintf(stdout, "updateS kernel time: %f.\n", timeValue); 
+
+	// Wait for all positions to be updated
+	cudaThreadSynchronize();
 }
 
 void cudaUpdateVBO(float * vbodptr, int width, int height)
