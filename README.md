@@ -123,6 +123,22 @@ Remember to email Harmony (harmoli+CIS565@seas.upenn.edu) your grade and why.
 
 ### How does changing the tile and block sizes change performance? Why?
 
+The following estimates were obtained simulating 2500 objects.
+
+Number of threads per block | Number of blocks | Frame rate | Number of kernel calls | Number of wasted calls
+:---: | :---: | :---: | :---: | :---: | :---:
+1 | x | x | x | x | x
+2 | x | x | x | x | x
+4 | x | x | x | x | x
+8 | x | x | x | x | x
+16 | x | x | x | x | x
+32 | x | x | x | x | x
+64 | x | x | x | x | x
+128 | x | x | x | x | x
+256 | x | x | x | x | x
+512 | x | x | x | x | x
+1024 | x | x | x | x | x
+
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget nisi ut odio placerat imperdiet. Donec aliquet neque odio, in tempus erat mollis lobortis. Fusce ut gravida diam, et aliquam lacus. Cras suscipit ipsum quis dolor lacinia, et tempus libero accumsan. Sed nisi nisl, ornare at ipsum sit amet, facilisis viverra risus. Integer iaculis turpis ac nunc blandit, ut viverra erat volutpat. Curabitur porttitor arcu at quam rhoncus, ut gravida neque lacinia. Nunc vitae sem maximus, ultrices erat vel, pretium erat.
 
 ### How does changing the number of planets change performance? Why?

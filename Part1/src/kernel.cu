@@ -97,9 +97,9 @@ glm::vec3 computeGravitationalAccelerationBetweenTwoBodies( glm::vec4 body1, glm
 
 	glm::vec3 r( body2.x - body1.x, body2.y - body1.y, body2.z - body1.z );
 
-	// If two bodies have identical positions, immediately return a force of 0 to avoid dividing by 0.
-	//if ( glm::length( r ) < EPSILON ) {
-	if ( glm::length( r ) < 0.1f ) {
+	// Threshold value determined through trial and error so that planets aren't flung out into the ether.
+	// Also, this avoids potential divide by zeros.
+	if ( glm::length( r ) < 0.2f ) {
 		return glm::vec3( 0.0f, 0.0f, 0.0f );
 	}
 
