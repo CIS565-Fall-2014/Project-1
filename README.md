@@ -118,3 +118,17 @@ describe the changes you make between experiments and how you are benchmarking.
 Please commit your changes to your forked version of the repository and open a
 pull request.  Please write your performance analysis in your README.md.
 Remember to email Harmony (harmoli+CIS565@seas.upenn.edu) your grade and why.
+
+## PERFORMANCE ANALYSIS
+
+### How does changing the tile and block sizes change performance? Why?
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget nisi ut odio placerat imperdiet. Donec aliquet neque odio, in tempus erat mollis lobortis. Fusce ut gravida diam, et aliquam lacus. Cras suscipit ipsum quis dolor lacinia, et tempus libero accumsan. Sed nisi nisl, ornare at ipsum sit amet, facilisis viverra risus. Integer iaculis turpis ac nunc blandit, ut viverra erat volutpat. Curabitur porttitor arcu at quam rhoncus, ut gravida neque lacinia. Nunc vitae sem maximus, ultrices erat vel, pretium erat.
+
+### How does changing the number of planets change performance? Why?
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget nisi ut odio placerat imperdiet. Donec aliquet neque odio, in tempus erat mollis lobortis. Fusce ut gravida diam, et aliquam lacus. Cras suscipit ipsum quis dolor lacinia, et tempus libero accumsan. Sed nisi nisl, ornare at ipsum sit amet, facilisis viverra risus. Integer iaculis turpis ac nunc blandit, ut viverra erat volutpat. Curabitur porttitor arcu at quam rhoncus, ut gravida neque lacinia. Nunc vitae sem maximus, ultrices erat vel, pretium erat.
+
+### Without running experiments, how would you expect the serial and GPU verions of matrix_math to compare? Why?
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget nisi ut odio placerat imperdiet. Donec aliquet neque odio, in tempus erat mollis lobortis. Fusce ut gravida diam, et aliquam lacus. Cras suscipit ipsum quis dolor lacinia, et tempus libero accumsan. Sed nisi nisl, ornare at ipsum sit amet, facilisis viverra risus. Integer iaculis turpis ac nunc blandit, ut viverra erat volutpat. Curabitur porttitor arcu at quam rhoncus, ut gravida neque lacinia. Nunc vitae sem maximus, ultrices erat vel, pretium erat.
