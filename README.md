@@ -1,3 +1,32 @@
+Performance Analysis
+
+1.
+blockSize fps
+{32,        18}
+{64,		   27}
+{128,	   32}
+{256,	   32}
+{512,	    29}
+{1024,	   29}
+
+so set blocksize to 128-256 will be most efficient.
+
+2.
+planetNum   fps
+{2500,         60}
+{5000,         32}
+{7500,         15}
+{10000,		 9}
+
+Obviously less particle reduce the computation
+
+3.
+If set matrix size as 5*5, then CPU can be more efficient. Because transfer data between memories takes more time when the data set is too small.
+With lager data set GPU computation can be better than CPU.
+
+
+
+
 Project 1
 =========
 
