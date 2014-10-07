@@ -10,7 +10,8 @@ dim3 threadsPerBlock(blockSize);
 
 int numObjects;
 const float planetMass = 3e8;
-const __device__ float starMass = 5e10;
+//const __device__ float starMass = 5e10;
+const __device__ float starMass = 5e12;
 
 const float scene_scale = 2e2; //size of the height map in simulation space
 
@@ -113,7 +114,7 @@ __device__  glm::vec3 accelerate(int N, glm::vec4 my_pos, glm::vec4 * their_pos)
 		x=-my_pos.x;
 		y=-my_pos.y;
 		r=sqrt(x*x+y*y)+1;
-		a=G*5e10/(r*r);
+		a=G*starMass/(r*r);
 		ax=ax+a*x/r;
 		ay=ay+a*y/r;
 	}
